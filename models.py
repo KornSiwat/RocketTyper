@@ -17,7 +17,7 @@ class Rocket(Model):
 
     def update(self):
         pass
-        
+
     def top_y(self):
         return self.y + (DOT_RADIUS // 2)
 
@@ -54,8 +54,7 @@ class World:
     def update(self, delta):
         if self.state == World.STATE_FROZEN:
             return
-        self.rocket.update(delta)
-
+            
     def on_key_press(self, key, key_modifiers):
         if key == arcade.key.SPACE:
             pass

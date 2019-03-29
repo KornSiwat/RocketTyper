@@ -57,7 +57,7 @@ class RocketTyperWindow(arcade.Window):
         arcade.draw_texture_rectangle(self.rocket_sprite.center_x , SCREEN_HEIGHT // 2,
                         SCREEN_WIDTH+50, SCREEN_HEIGHT, self.background)
 
-        arcade.draw_text("Space to Start", -100, self.height//2 , arcade.color.GREEN, 30)
+        # arcade.draw_text("Space to Start", -100, self.height//2 , arcade.color.GREEN, 30)
         self.rocket_sprite.draw()
         arcade.draw_text(str(self.world.rocket.health),
                         self.world.rocket.x + (SCREEN_WIDTH // 2) - 60,
