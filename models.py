@@ -2,13 +2,38 @@ import arcade.key
 from random import randint,random
 import time
 
-DOT_RADIUS = 40
+
+class MenuChoice(arcade.AnimatedTimeSprite):
+    def __init__(self):
+        self.select = False
+
+        super().__init__(*args, **kwargs)
+
+    def select(self):
+        self.select = True
+
+    def unselect(self):
+        self.select = False
 
 class Model:
     def __init__(self, world, x, y, angle):
         self.world = world
         self.x = x
         self.y = y
+
+class ModelSprite(arcade.Sprite):
+    def __init__(self, *args, **kwargs):
+        self.model = kwargs.pop('model', None)
+
+        super().__init__(*args, **kwargs)
+
+    def sync_with_model(self):
+        if self.model:
+            self.set_position(self.model.x, self.model.y)
+
+    def draw(self):
+        self.sync_with_model()
+        super().draw()
 
 class Rocket(Model):
     def __init__(self, world, x, y):
@@ -17,12 +42,6 @@ class Rocket(Model):
 
     def update(self):
         pass
-
-    def top_y(self):
-        return self.y + (DOT_RADIUS // 2)
-
-    def bottom_y(self):
-        return self.y - (DOT_RADIUS // 2)
 
     def die(self):
         if self.health <= 0:
@@ -37,7 +56,7 @@ class World:
         self.width = width
         self.height = height
 
-        self.rocket = Rocket(self, 0, 120)
+        self.rocket = Rocket(self, 200, 120)
         self.score = 0
 
         self.state = World.STATE_FROZEN
