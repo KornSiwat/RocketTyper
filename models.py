@@ -3,17 +3,17 @@ from random import randint,random
 import time
 
 
-class MenuChoice(arcade.AnimatedTimeSprite):
-    def __init__(self):
-        self.select = False
+class MenuChoiceSprite(arcade.AnimatedTimeSprite):
+    def __init__(self, *args, **kwargs):
+        self.is_select = False
 
         super().__init__(*args, **kwargs)
 
     def select(self):
-        self.select = True
+        self.is_select = True
 
     def unselect(self):
-        self.select = False
+        self.is_select = False
 
 class Model:
     def __init__(self, world, x, y, angle):
@@ -21,7 +21,7 @@ class Model:
         self.x = x
         self.y = y
 
-class ModelSprite(arcade.Sprite):
+class ModelSprite(arcade.AnimatedTimeSprite):
     def __init__(self, *args, **kwargs):
         self.model = kwargs.pop('model', None)
 
@@ -73,7 +73,9 @@ class World:
     def update(self, delta):
         if self.state == World.STATE_FROZEN:
             return
-            
+        self.rocket.update()
+        self.rocket.update_animation()
+
     def on_key_press(self, key, key_modifiers):
         if key == arcade.key.SPACE:
             pass
