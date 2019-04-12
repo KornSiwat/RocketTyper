@@ -21,27 +21,15 @@ class Model:
         self.x = x
         self.y = y
 
-class ModelSprite(arcade.AnimatedTimeSprite):
-    def __init__(self, *args, **kwargs):
-        self.model = kwargs.pop('model', None)
-
+class Rocket(arcade.AnimatedTimeSprite):
+    def __init__(self, x, y, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-    def sync_with_model(self):
-        if self.model:
-            self.set_position(self.model.x, self.model.y)
-
-    def draw(self):
-        self.sync_with_model()
-        super().draw()
-
-class Rocket(Model):
-    def __init__(self, world, x, y):
-        super().__init__(world, x, y, 0)
+        self.center_x = x
+        self.center_y = y
         self.health = 1000
 
     def update(self):
-        pass
+        self.update_animation()
 
     def die(self):
         if self.health <= 0:
@@ -56,7 +44,7 @@ class World:
         self.width = width
         self.height = height
 
-        self.rocket = Rocket(self, 200, 120)
+        self.rocket = None
         self.score = 0
 
         self.state = World.STATE_FROZEN
@@ -74,7 +62,7 @@ class World:
         if self.state == World.STATE_FROZEN:
             return
         self.rocket.update()
-        self.rocket.update_animation()
+        # self.rocket.update_animation()
 
     def on_key_press(self, key, key_modifiers):
         if key == arcade.key.SPACE:

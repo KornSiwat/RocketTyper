@@ -1,5 +1,5 @@
 import arcade
-from models import World, ModelSprite, MenuChoiceSprite
+from models import World, Rocket, MenuChoiceSprite
 import time
 
 SCREEN_WIDTH = 1000
@@ -12,11 +12,19 @@ routes = {
     'scoreboard':3,
 }
 
+choices = {
+    0: 'game',
+    1: 'instruction',
+    2: 'scoreboard'
+
+}
+
 class RocketTyperWindow(arcade.Window):
     def __init__(self, width, height):
         super().__init__(width, height)
 
-        self.current_route = routes['game']
+        self.current_route = routes['menu']
+        self.selecting_choice = 0
 
         self.background = arcade.load_texture("images/background.png")
         self.menu_setup()
@@ -59,7 +67,6 @@ class RocketTyperWindow(arcade.Window):
         self.howToPlay.unselect()
         self.scoreboard.unselect()
 
-        self.choice_list.append(self.rocket_menu)
         self.choice_list.append(self.start)
         self.choice_list.append(self.howToPlay)
         self.choice_list.append(self.scoreboard)
@@ -67,11 +74,12 @@ class RocketTyperWindow(arcade.Window):
     def game_setup(self, width, height):
         self.world = World(width, height)
         
-        self.rocket_sprite = ModelSprite('images/rocket.png', model=self.world.rocket)                                        
+        self.rocket_sprite = Rocket(100,200)                                        
+        self.rocket_sprite.append_texture(arcade.load_texture('images/rocket.png'))
         self.rocket_sprite.append_texture(arcade.load_texture('images/rocket1.png'))
+        self.rocket_sprite.set_texture(0)
 
-        self.timeCount = time.time()
-        self.cur_texture = 0    
+        self.world.rocket = self.rocket_sprite
 
     def update(self, delta):
         if self.current_route == routes['menu']:
@@ -83,15 +91,6 @@ class RocketTyperWindow(arcade.Window):
                     choice.update_animation()
         elif self.current_route == routes['game']:
             self.world.update(delta)
-
-    def move(self):
-        if self.cur_texture == 0:
-            self.rocket_sprite.set_texture(1)
-            self.cur_texture = 1
-        else:
-            self.rocket_sprite.set_texture(0)
-            self.cur_texture = 0
-        self.timeCount = time.time()
 
     def on_draw(self):
 
@@ -114,11 +113,29 @@ class RocketTyperWindow(arcade.Window):
                         self.height - 30,
                         arcade.color.BLACK, 20)
 
+    def update_selected_choice(self):
+        for choice in self.choice_list:
+            choice.unselect()
+            choice.set_texture(1)
+        self.choice_list[self.selecting_choice].select()
+
     def on_key_press(self, key, key_modifiers):
-        if key == arcade.key.SPACE:
-            if not self.world.is_started():
-                self.world.start()
-            self.world.on_key_press(key, key_modifiers)
+        if self.current_route == routes['menu']:
+            if key == arcade.key.DOWN:
+                if self.selecting_choice < 2:
+                    self.selecting_choice += 1
+                else:
+                    self.selecting_choice = 0
+                self.update_selected_choice()
+            elif key == arcade.key.UP:
+                if self.selecting_choice > 0 :
+                    self.selecting_choice -= 1
+                else:
+                    self.selecting_choice = 2
+                self.update_selected_choice()
+            elif key == arcade.key.ENTER:
+                self.current_route = routes[choices[self.selecting_choice]]
+
 
 if __name__ == '__main__':
     window = RocketTyperWindow(SCREEN_WIDTH, SCREEN_HEIGHT)
