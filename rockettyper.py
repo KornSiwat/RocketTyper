@@ -74,10 +74,16 @@ class RocketTyperWindow(arcade.Window):
     def game_setup(self, width, height):
         self.world = World(width, height)
         
-        self.rocket_sprite = Rocket(100,200)                                        
-        self.rocket_sprite.append_texture(arcade.load_texture('images/rocket.png'))
+        self.rocket_sprite = Rocket(140,-120)                                        
+        self.rocket_sprite.append_texture(arcade.load_texture('images/rocket6.png'))
+        self.rocket_sprite.append_texture(arcade.load_texture('images/rocket5.png'))
+        self.rocket_sprite.append_texture(arcade.load_texture('images/rocket4.png'))
+        self.rocket_sprite.append_texture(arcade.load_texture('images/rocket3.png'))
+        self.rocket_sprite.append_texture(arcade.load_texture('images/rocket2.png'))
         self.rocket_sprite.append_texture(arcade.load_texture('images/rocket1.png'))
+        self.rocket_sprite.append_texture(arcade.load_texture('images/rocket.png'))
         self.rocket_sprite.set_texture(0)
+        self.rocket_sprite.texture_change_frames = 8
 
         self.world.rocket = self.rocket_sprite
 
@@ -120,6 +126,7 @@ class RocketTyperWindow(arcade.Window):
         self.choice_list[self.selecting_choice].select()
 
     def on_key_press(self, key, key_modifiers):
+
         if self.current_route == routes['menu']:
             if key == arcade.key.DOWN:
                 if self.selecting_choice < 2:
@@ -135,6 +142,20 @@ class RocketTyperWindow(arcade.Window):
                 self.update_selected_choice()
             elif key == arcade.key.ENTER:
                 self.current_route = routes[choices[self.selecting_choice]]
+                if self.current_route == routes['game']:
+                    self.world.start()
+        elif self.current_route == routes['game']:
+            if key == arcade.key.DOWN:
+                self.world.rocket.move_down()
+            elif key == arcade.key.UP:
+                self.world.rocket.move_up()
+            elif key == arcade.key.P:
+                if self.world.is_started():
+                    self.world.freeze()
+                else:
+                    self.world.start()
+
+
 
 
 if __name__ == '__main__':
