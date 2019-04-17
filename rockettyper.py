@@ -73,19 +73,35 @@ class RocketTyperWindow(arcade.Window):
 
     def game_setup(self, width, height):
         self.world = World(width, height)
+
+        self.cockpit = arcade.Sprite()
+        self.cockpit.center_x,self.cockpit.center_y = width//2, 50
+        self.cockpit.append_texture(arcade.load_texture('images/cockpit.png'))
+        self.cockpit.set_texture(0)
         
+        self.missile = arcade.Sprite()
+        self.missile.center_x,self.missile.center_y = 700, 450
+        self.missile.append_texture(arcade.load_texture('images/missile.png'))
+        self.missile.set_texture(0)
+        
+        self.rocket_scale = 1.3
         self.rocket_sprite = Rocket(140,-120)                                        
-        self.rocket_sprite.append_texture(arcade.load_texture('images/rocket6.png'))
-        self.rocket_sprite.append_texture(arcade.load_texture('images/rocket5.png'))
-        self.rocket_sprite.append_texture(arcade.load_texture('images/rocket4.png'))
-        self.rocket_sprite.append_texture(arcade.load_texture('images/rocket3.png'))
-        self.rocket_sprite.append_texture(arcade.load_texture('images/rocket2.png'))
-        self.rocket_sprite.append_texture(arcade.load_texture('images/rocket1.png'))
-        self.rocket_sprite.append_texture(arcade.load_texture('images/rocket.png'))
+        self.rocket_sprite.append_texture(arcade.load_texture('images/rocket6.png', scale=self.rocket_scale))
+        self.rocket_sprite.append_texture(arcade.load_texture('images/rocket5.png', scale=self.rocket_scale))
+        self.rocket_sprite.append_texture(arcade.load_texture('images/rocket4.png', scale=self.rocket_scale))
+        self.rocket_sprite.append_texture(arcade.load_texture('images/rocket3.png', scale=self.rocket_scale))
+        self.rocket_sprite.append_texture(arcade.load_texture('images/rocket2.png', scale=self.rocket_scale))
+        self.rocket_sprite.append_texture(arcade.load_texture('images/rocket1.png', scale=self.rocket_scale))
+        self.rocket_sprite.append_texture(arcade.load_texture('images/rocket.png', scale=self.rocket_scale))
         self.rocket_sprite.set_texture(0)
         self.rocket_sprite.texture_change_frames = 8
 
         self.world.rocket = self.rocket_sprite
+
+        for cloud in self.world.cloud_list:
+            cloud.append_texture(arcade.load_texture('images/cloud.png'))
+            cloud.set_texture(0)
+
 
     def update(self, delta):
         if self.current_route == routes['menu']:
@@ -113,7 +129,11 @@ class RocketTyperWindow(arcade.Window):
         self.choice_list.draw()
             
     def draw_game(self):
+        if self.world.is_ready == True:
+            self.world.cloud_list.draw()
         self.rocket_sprite.draw()
+        self.cockpit.draw()
+        self.missile.draw()
         arcade.draw_text(str(self.world.rocket.health),
                         self.width-60 ,
                         self.height - 30,

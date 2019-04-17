@@ -21,11 +21,27 @@ class Cloud(arcade.Sprite):
 
     def __init__(self, width, height, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.screen_height = height
+        self.screen_width = width
         self.speed = SPEED
-        self.center_x = randint(0, width)
-        self.center_y = height + (self.INSTANCE_NUMBER * 10)
+        self.center_x = randint(0, self.screen_width)
+        self.center_y = self.screen_height + (self.INSTANCE_NUMBER * 300)
 
-        
+        Cloud.INSTANCE_NUMBER += 1
+
+    def update(self):
+        self.center_y -= self.speed
+        if self.out_of_screen():
+            self.reuse()
+
+    def out_of_screen(self):
+        if self.center_y + 47 < 0:
+            return True
+        return False
+
+    def reuse(self):
+        self.center_x = randint(100, self.screen_width)
+        self.center_y = self.screen_height + 300
 
 class Rocket(arcade.AnimatedTimeSprite):
 
@@ -60,7 +76,7 @@ class World:
     STATE_FROZEN = 1
     STATE_STARTED = 2
 
-    def __init__(self, width, height):
+    def __init__(self, width, height, cloud_amount=5):
         self.width = width
         self.height = height
 
@@ -71,7 +87,10 @@ class World:
 
         self.state = World.STATE_FROZEN
 
+        self.cloud_amount = cloud_amount
         self.cloud_list = arcade.SpriteList()
+        for _ in range(self.cloud_amount):
+            self.cloud_list.append(Cloud(self.width, self.height))
 
     def start(self):
         self.state = World.STATE_STARTED
@@ -96,6 +115,8 @@ class World:
         self.rocket.update()
         self.rocket.update_animation()
         self.check_start_pos()
+        for cloud in self.cloud_list:
+            cloud.update()
 
     def on_key_press(self, key, key_modifiers):
         if key == arcade.key.SPACE:
