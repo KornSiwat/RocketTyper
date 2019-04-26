@@ -72,6 +72,48 @@ class Rocket(arcade.AnimatedTimeSprite):
     def move_down(self):
         self.center_y -= self.speed
 
+class Missile(arcade.Sprite):
+    def __init__(self, x, y,word=''):
+        self.center_x = x
+        self.center_y = y
+        self.word = Word(x,y, word)
+        self.type = ''
+        self.selected = False
+        self.active = True
+
+#    def update(self):
+#         pass
+
+    def explode(self):
+        self.active = False
+
+class Word():
+    def __init__(self,x ,y, word):
+        self.x = x
+        self.y = y
+
+        self.char_list = map(lambda x: Char(x), word)
+
+    def draw(self):
+        pass
+        
+    def print_word(self):
+        for char in self.char_list:
+            print(char)
+
+class Char():
+    def __init__(self,char):
+        self.char = char
+        self.color = arcade.color.BLACK
+        self.active = True    
+
+    def is_typed(self):
+        self.color = arcade.color.GRAY
+        self.active = False
+
+    def __str__(self):
+        return self.char
+
 class World:
     STATE_FROZEN = 1
     STATE_STARTED = 2
