@@ -73,19 +73,26 @@ class Rocket(arcade.AnimatedTimeSprite):
         self.center_y -= self.speed
 
 class Missile(arcade.Sprite):
-    def __init__(self, x, y,word=''):
+    def __init__(self, x, y,word='', *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.center_x = x
         self.center_y = y
-        self.word = Word(x,y, word)
+        self.word = Word(self.center_x + 100 , self.center_y, word)
         self.type = ''
         self.selected = False
         self.active = True
 
-#    def update(self):
-#         pass
-
     def explode(self):
         self.active = False
+
+    def draw_with_word(self):
+        self.draw()
+        self.word.draw()
+        # arcade.draw_text('str(elem.char)',self.center_x+100, self.center_y, arcade.color.WHEAT)
+
+    def update(self):
+        self.center_x -= 0.5
+        self.word.update(self.center_x)
 
 class Word():
     def __init__(self,x ,y, word):
@@ -95,16 +102,24 @@ class Word():
         self.char_list = map(lambda x: Char(x), word)
 
     def draw(self):
-        pass
+        arcade.draw_text('str(kuy gu fix dai laew i sus)',self.x, self.y, arcade.color.WHEAT)
+        # for index, elem in enumerate(self.char_list):
+        #     arcade.draw_text(str(elem.char),self.x, self.y, elem.color)
+        #     arcade.draw_circle_filled(300,300,100,color=elem.color)
+
+    def update(self, new_x):
+        self.x = new_x
         
     def print_word(self):
         for char in self.char_list:
             print(char)
 
+    
+
 class Char():
     def __init__(self,char):
         self.char = char
-        self.color = arcade.color.BLACK
+        self.color = arcade.color.WHITE
         self.active = True    
 
     def is_typed(self):
@@ -113,6 +128,11 @@ class Char():
 
     def __str__(self):
         return self.char
+
+class MissileManager():
+    def __init__(self, width, height, ):
+        pass
+
 
 class World:
     STATE_FROZEN = 1
@@ -133,6 +153,8 @@ class World:
         self.cloud_list = arcade.SpriteList()
         for _ in range(self.cloud_amount):
             self.cloud_list.append(Cloud(self.width, self.height))
+
+        # self.missile_manager = MissileManager()
 
     def start(self):
         self.state = World.STATE_STARTED
