@@ -78,12 +78,9 @@ class RocketTyperWindow(arcade.Window):
         self.cockpit.append_texture(arcade.load_texture('images/cockpit.png'))
         self.cockpit.set_texture(0)
         
-        self.test = Missile(900,400,'itest')
-        self.test.append_texture(arcade.load_texture('images/missile.png'))
-        self.test.set_texture(0)
         
         self.rocket_scale = 1.3
-        self.rocket_sprite = Rocket(140,-120)                                        
+        self.rocket_sprite = Rocket(110,-120)                                        
         self.rocket_sprite.append_texture(arcade.load_texture('images/rocket6.png', scale=self.rocket_scale))
         self.rocket_sprite.append_texture(arcade.load_texture('images/rocket5.png', scale=self.rocket_scale))
         self.rocket_sprite.append_texture(arcade.load_texture('images/rocket4.png', scale=self.rocket_scale))
@@ -93,6 +90,11 @@ class RocketTyperWindow(arcade.Window):
         self.rocket_sprite.append_texture(arcade.load_texture('images/rocket.png', scale=self.rocket_scale))
         self.rocket_sprite.set_texture(0)
         self.rocket_sprite.texture_change_frames = 8
+        print(self.rocket_sprite.right)
+
+        self.test = Missile(900,400,'itest',target=self.rocket_sprite.right)
+        self.test.append_texture(arcade.load_texture('images/missile.png'))
+        self.test.set_texture(0)
 
         self.world.rocket = self.rocket_sprite
 
