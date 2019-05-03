@@ -90,13 +90,10 @@ class RocketTyperWindow(arcade.Window):
         self.rocket_sprite.append_texture(arcade.load_texture('images/rocket.png', scale=self.rocket_scale))
         self.rocket_sprite.set_texture(0)
         self.rocket_sprite.texture_change_frames = 8
-        print(self.rocket_sprite.right)
-
-        self.test = Missile(900,400,'itest',target=self.rocket_sprite.right)
-        self.test.append_texture(arcade.load_texture('images/missile.png'))
-        self.test.set_texture(0)
 
         self.world.rocket = self.rocket_sprite
+        self.world.add_missile_manager()
+        self.world.add_word_list('word/word.txt')
 
         for cloud in self.world.cloud_list:
             cloud.append_texture(arcade.load_texture('images/cloud.png'))
@@ -112,8 +109,6 @@ class RocketTyperWindow(arcade.Window):
                     choice.update_animation()
         elif self.current_route == routes['game']:
             self.world.update(delta)
-            self.test.update()
-            self.test.update_animation()
 
     def on_draw(self):
 
@@ -134,7 +129,8 @@ class RocketTyperWindow(arcade.Window):
             self.world.cloud_list.draw()
         self.rocket_sprite.draw()
         self.cockpit.draw()
-        self.test.draw_with_word()
+        for slot in self.world.missile_manager.slot_list:
+            slot.draw()
         arcade.draw_text(str(self.world.rocket.health),
                         self.width-60 ,
                         self.height - 30,

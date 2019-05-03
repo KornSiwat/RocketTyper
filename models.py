@@ -1,5 +1,5 @@
 import arcade.key
-from random import randint,random
+from random import randint,choice
 import time
 
 SPEED = 7
@@ -75,14 +75,17 @@ class Rocket(arcade.AnimatedTimeSprite):
 class Missile(arcade.Sprite):
     def __init__(self, x, y, word='',target=0, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.append_texture(arcade.load_texture('images/missile.png'))
+        self.set_texture(0)
         self.center_x = x
         self.center_y = y
         self.target = target - 10
         self.distance = 60
-        self.word = Word(self.center_x + self.distance , self.center_y - 5, word)
+        self.word = Word(self.right , self.center_y - 5, word)
         self.type = ''
         self.selected = False
         self.active = True
+        self.length = self.right + 10 * len(self.word.char_list)
 
     def explode(self):
         self.active = False
@@ -101,7 +104,6 @@ class Missile(arcade.Sprite):
 class Word():
     def __init__(self,x ,y, word):
         self.x = x
-        print(self.x)
         self.y = y
 
         self.char_list = list(map(lambda x: Char(x), word))
@@ -135,10 +137,51 @@ class MissileManager():
         self.attack_zone_x = [target, width]
         self.attack_zone_y = [150, height]
         self.difficulty = difficulty
-        self.map = [0 for x in range((self.attack_zone_y[1] - self.attack_zone_y[0]) // missile_height)]
-        
+        self.slot_list = []
+        for y_pos in range(self.attack_zone_y[1],200, -missile_height):
+            self.slot_list.append(Slot(self.attack_zone_x, y_pos-50, target))
+        self.word_list = None
+        self.timer = time.time()
 
-class ReadWordList():
+    def add_word_list(self, lst):
+        self.word_list = lst
+
+    def update(self):
+        if time.time() - self.timer >= 5:
+            self.deploy()
+            self.timer = time.time()
+        for slot in self.slot_list:
+            slot.update()
+
+    def deploy(self):
+        choice([slot for slot in self.slot_list if slot.free == True]).create_missile('try')
+
+class Slot():
+    def __init__(self, x, y, target):
+        self.free = True
+        self.x_points = x
+        self.y_pos = y
+        self.missile = None
+        self.wait_pixel = 0
+        self.start_alphabet = ''
+        self.target = target
+
+    def create_missile(self, word):
+        self.missile = Missile(self.x_points[1], self.y_pos, word=word, target=self.target)
+        self.start_alphabet = word[0]
+        self.free = False
+
+    def draw(self):
+        if self.missile != None:
+            self.missile.draw_with_word()
+            if self.missile.active == False:
+                self.missile = None
+
+    def update(self):
+        if self.missile != None:
+            self.missile.update()
+
+class ReadWordFile():
     def __init__(self, file_name=''):
         with open(file_name, 'r') as Fin:
             self.raw_word = [x.strip() for x in Fin.readlines()]
@@ -148,6 +191,9 @@ class ReadWordList():
                 self.catagorized_word[word[0].lower()] = [word]
             else:
                 self.catagorized_word[word[0].lower()].append(word)
+
+    def get_list(self):
+        return self.catagorized_word
 
 class World:
     STATE_FROZEN = 1
@@ -169,6 +215,12 @@ class World:
         for _ in range(self.cloud_amount):
             self.cloud_list.append(Cloud(self.width, self.height))
 
+    def add_missile_manager(self):
+        self.missile_manager = MissileManager(self.width, self.height, target=0)
+
+    def add_word_list(self, path):
+        self.missile_manager.add_word_list(ReadWordFile(path).get_list())
+
     def start(self):
         self.state = World.STATE_STARTED
 
@@ -179,7 +231,6 @@ class World:
         if self.rocket.center_y >= self.height//2:
             self.ready()
             self.rocket.ready()
-            self.missile_manager = MissileManager(self.width, self.height, self.rocket.right)
 
     def ready(self):
         self.is_ready = True
@@ -195,6 +246,7 @@ class World:
         self.check_start_pos()
         for cloud in self.cloud_list:
             cloud.update()
+        self.missile_manager.update()
 
     def on_key_press(self, key, key_modifiers):
         if key == arcade.key.ESCAPE:
@@ -202,4 +254,4 @@ class World:
                 self.freeze()
             else:
                 self.start()
-        
+
