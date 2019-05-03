@@ -166,15 +166,7 @@ class RocketTyperWindow(arcade.Window):
                 if self.current_route == routes['game']:
                     self.world.start()
         elif self.current_route == routes['game']:
-            if key == arcade.key.DOWN:
-                self.world.rocket.move_down()
-            elif key == arcade.key.UP:
-                self.world.rocket.move_up()
-            elif key == arcade.key.P:
-                if self.world.is_started():
-                    self.world.freeze()
-                else:
-                    self.world.start()
+            self.world.on_key_press(key,key_modifiers)
 
 if __name__ == '__main__':
     window = RocketTyperWindow(SCREEN_WIDTH, SCREEN_HEIGHT)

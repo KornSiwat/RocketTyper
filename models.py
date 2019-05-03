@@ -142,6 +142,12 @@ class ReadWordList():
     def __init__(self, file_name=''):
         with open(file_name, 'r') as Fin:
             self.raw_word = [x.strip() for x in Fin.readlines()]
+        self.catagorized_word = {}
+        for word in self.raw_word:
+            if word[0].lower() not in self.catagorized_word:
+                self.catagorized_word[word[0].lower()] = [word]
+            else:
+                self.catagorized_word[word[0].lower()].append(word)
 
 class World:
     STATE_FROZEN = 1
@@ -163,9 +169,11 @@ class World:
         for _ in range(self.cloud_amount):
             self.cloud_list.append(Cloud(self.width, self.height))
 
-
     def start(self):
         self.state = World.STATE_STARTED
+
+    def freeze(self):
+        self.state = World.STATE_FROZEN
 
     def check_start_pos(self):
         if self.rocket.center_y >= self.height//2:
@@ -175,9 +183,6 @@ class World:
 
     def ready(self):
         self.is_ready = True
-
-    def freeze(self):
-        self.state = World.STATE_FROZEN     
 
     def is_started(self):
         return self.state == World.STATE_STARTED
@@ -191,6 +196,10 @@ class World:
         for cloud in self.cloud_list:
             cloud.update()
 
-    # def on_key_press(self, key, key_modifiers):
-    #     if key == arcade.key.SPACE:
-    #         pass
+    def on_key_press(self, key, key_modifiers):
+        if key == arcade.key.ESCAPE:
+            if self.is_started():
+                self.freeze()
+            else:
+                self.start()
+        

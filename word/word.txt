@@ -1,4 +1,7 @@
 ant
+are
+aow
+aer
 bird
 cat
 dog
