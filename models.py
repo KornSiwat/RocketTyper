@@ -131,9 +131,17 @@ class Char():
         return self.char
 
 class MissileManager():
-    def __init__(self, width, height, rocket_right=0):
-        pass
+    def __init__(self, width, height, target, difficulty=0, missile_height=100):
+        self.attack_zone_x = [target, width]
+        self.attack_zone_y = [150, height]
+        self.difficulty = difficulty
+        self.map = [0 for x in range((self.attack_zone_y[1] - self.attack_zone_y[0]) // missile_height)]
+        
 
+class ReadWordList():
+    def __init__(self, file_name=''):
+        with open(file_name, 'r') as Fin:
+            self.raw_word = [x.strip() for x in Fin.readlines()]
 
 class World:
     STATE_FROZEN = 1
