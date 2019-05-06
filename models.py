@@ -1,6 +1,7 @@
 import arcade.key
 from random import randint,choice
 import time
+import string
 
 SPEED = 7
 
@@ -82,9 +83,10 @@ class Missile(arcade.Sprite):
         self.target = target - 10
         self.distance = 60
         self.word = Word(self.right , self.center_y - 5, word)
-        self.type = ''
+        self.first_alphabet = ord(self.word.char_list[0].char)
         self.selected = False
         self.active = True
+        self.hit = True
         self.length = self.right + 10 * len(self.word.char_list)
 
     def explode(self):
@@ -94,7 +96,7 @@ class Missile(arcade.Sprite):
         self.draw()
         self.word.draw()
 
-    def update(self):
+    def update(self, key):
         if self.left >= self.target:
             self.center_x -= 0.5
             self.word.update(self.center_x + self.distance)
@@ -105,8 +107,9 @@ class Word():
     def __init__(self,x ,y, word):
         self.x = x
         self.y = y
-
         self.char_list = list(map(lambda x: Char(x), word))
+        self.current_char = self.char_list[0]
+        self.complete = False
 
     def draw(self):
         for index, elem in enumerate(self.char_list):
@@ -114,7 +117,17 @@ class Word():
 
     def update(self, new_x):
         self.x = new_x
-        
+        for char in self.char_list:
+            if char.active == True:
+                self.current_char = char
+        else:
+            self.complete = True
+
+
+    def check_key(self, key):
+        if key == ord(self.current_char.char):
+            self.current_char.active = False
+
     def print_word(self):
         for char in self.char_list:
             print(char)
@@ -126,7 +139,7 @@ class Char():
         self.active = True    
 
     def is_typed(self):
-        self.color = arcade.color.GRAY
+        self.color = arcade.color.RED
         self.active = False
 
     def __str__(self):
@@ -163,12 +176,10 @@ class Slot():
         self.y_pos = y
         self.missile = None
         self.wait_pixel = 0
-        self.start_alphabet = ''
         self.target = target
 
     def create_missile(self, word):
         self.missile = Missile(self.x_points[1], self.y_pos, word=word, target=self.target)
-        self.start_alphabet = word[0]
         self.free = False
 
     def draw(self):
@@ -248,10 +259,22 @@ class World:
             cloud.update()
         self.missile_manager.update()
 
+    # def check_key(self):
+    #     if !self.any_selected():
+
+
+    def any_selected(self):
+        for slot in self.missile_manager.slot_list:
+            if slot.missile != None:
+                if slot.missile.selected == True:
+                    return True
+        return False
+
     def on_key_press(self, key, key_modifiers):
         if key == arcade.key.ESCAPE:
             if self.is_started():
                 self.freeze()
             else:
                 self.start()
-
+        else:
+            self.type = key
