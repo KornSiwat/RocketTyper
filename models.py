@@ -99,7 +99,7 @@ class Missile(arcade.Sprite):
     def update(self, key):
         if self.left >= self.target:
             self.center_x -= 0.5
-            self.word.update(self.center_x + self.distance)
+            self.word.update(self.center_x + self.distance, key)
         else:
             self.explode()
 
@@ -115,18 +115,20 @@ class Word():
         for index, elem in enumerate(self.char_list):
             arcade.draw_text(str(elem.char),self.x + 10 * index, self.y, elem.color, font_size=16)
 
-    def update(self, new_x):
+    def update(self, new_x, key):
         self.x = new_x
         for char in self.char_list:
             if char.active == True:
                 self.current_char = char
+                break
         else:
             self.complete = True
-
+        self.check_key(key)
 
     def check_key(self, key):
         if key == ord(self.current_char.char):
-            self.current_char.active = False
+            print(key, ord(self.current_char.char))
+            self.current_char.is_typed()
 
     def print_word(self):
         for char in self.char_list:
@@ -151,7 +153,7 @@ class MissileManager():
         self.attack_zone_y = [150, height]
         self.difficulty = difficulty
         self.slot_list = []
-        for y_pos in range(self.attack_zone_y[1],200, -missile_height):
+        for y_pos in range(self.attack_zone_y[1],200, -(missile_height)):
             self.slot_list.append(Slot(self.attack_zone_x, y_pos-50, target))
         self.word_list = None
         self.timer = time.time()
@@ -159,12 +161,12 @@ class MissileManager():
     def add_word_list(self, lst):
         self.word_list = lst
 
-    def update(self):
+    def update(self, key):
         if time.time() - self.timer >= 5:
             self.deploy()
             self.timer = time.time()
         for slot in self.slot_list:
-            slot.update()
+            slot.update(key)
 
     def deploy(self):
         choice([slot for slot in self.slot_list if slot.free == True]).create_missile('try')
@@ -188,9 +190,9 @@ class Slot():
             if self.missile.active == False:
                 self.missile = None
 
-    def update(self):
+    def update(self, key):
         if self.missile != None:
-            self.missile.update()
+            self.missile.update(key)
 
 class ReadWordFile():
     def __init__(self, file_name=''):
@@ -225,6 +227,7 @@ class World:
         self.cloud_list = arcade.SpriteList()
         for _ in range(self.cloud_amount):
             self.cloud_list.append(Cloud(self.width, self.height))
+        self.type = None
 
     def add_missile_manager(self):
         self.missile_manager = MissileManager(self.width, self.height, target=0)
@@ -257,7 +260,7 @@ class World:
         self.check_start_pos()
         for cloud in self.cloud_list:
             cloud.update()
-        self.missile_manager.update()
+        self.missile_manager.update(self.type)
 
     # def check_key(self):
     #     if !self.any_selected():
@@ -278,3 +281,4 @@ class World:
                 self.start()
         else:
             self.type = key
+            print(self.type)
