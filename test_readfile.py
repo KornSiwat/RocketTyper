@@ -1,5 +1,5 @@
-from models import ReadWordList
+from models import ReadWordFile
 
-a = ReadWordList('word/word.txt')
+a = ReadWordFile('word/word.txt')
 print(a.raw_word)
 print(a.catagorized_word)

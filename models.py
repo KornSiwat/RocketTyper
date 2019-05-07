@@ -200,7 +200,7 @@ class MissileManager():
         self.check_deploy_time()
         for slot in self.get_used_slot():
             slot.update_pos()
-        if self.current_slot == None:
+        if self.current_slot == None or self.current_slot.is_select() == False:
             for slot in self.get_used_slot():
                 slot.update_key(key)
                 if slot.is_select() == True:
@@ -216,7 +216,7 @@ class MissileManager():
 
     def deploy(self):
         if self.have_free_slot() == True:
-            choice(self.get_free_slot()).create_missile('test')
+            choice(self.get_free_slot()).create_missile(choice(self.word_list[choice([x for x in self.word_list])]))
 
     def get_free_slot(self):
         return [slot for slot in self.slot_list if slot.is_use() == False]
@@ -292,11 +292,34 @@ class ReadWordFile():
 
 class WordManager():
     def __init__(self, word_dict):
-        self.word_dict = word_dict
         self._used = []
         self._unused = []
+        self._long_word = dict()
+        self._short_word = dict()
+        for alphabet in word_dict:
+            self._short_word[alphabet] = []
+            self._long_word[alphabet] = []
+            for word in word_dict[alphabet]:
+                if len(word) >= 5:
+                    self._long_word[alphabet].append(word)
+                else:
+                    self._short_word[alphabet].append(word)
 
-    
+    def _get_short(self):
+        self._result = dict()
+        for alphabet in self._unused:
+            self._result[alphabet] = self._short_word[alphabet]
+        return self._result
+
+    def _get_long(self):
+        self._result = dict()
+        for alphabet in self._unused:
+            self._result[alphabet] = self._short_word[alphabet]
+        return self._result
+
+    def generate(self):
+        pass
+
 
 class World:
     STATE_FROZEN = 1
@@ -351,10 +374,7 @@ class World:
         for cloud in self.cloud_list:
             cloud.update()
         self.missile_manager.update(self.type)
-
-    # def check_key(self):
-    #     if !self.any_selected():
-
+        self.type = 0
 
     def any_selected(self):
         for slot in self.missile_manager.slot_list:
