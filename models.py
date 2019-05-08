@@ -234,6 +234,8 @@ class MissileManager():
         self._check_deploy_time()
         self._update_pos()
         self._key_handle(key)
+        self._update_damage()
+        self._update_missile_count()
 
     def _update_pos(self):
         for slot in self._get_used_slot():
@@ -279,6 +281,18 @@ class MissileManager():
             if slot.is_use() == False:
                 return True
         return False
+
+    def get_damage(self):
+        return self._damage
+
+    def reset_damage(self):
+        self._damage = 0 
+
+    def get_missile_count(self):
+        return self._missile_count
+    
+    def reset_missile_count(self):
+        self._missile_count = 0
 
 class Slot():
     def __init__(self, x, y, target):
@@ -423,8 +437,8 @@ class World:
         self._height = height
 
         self._rocket = None
-        self._score = 0
-        self._altitude = 0
+        self._missile_count = 0
+        self._time = 0
         self._ready = False
 
         self._state = World.STATE_FROZEN
@@ -464,20 +478,32 @@ class World:
 
     def ready(self):
         self._ready = True
+        self._start_time = time.time()
 
     def is_started(self):
         return self._state == World.STATE_STARTED
 
     def draw(self):
         if self.is_started() == True:
-            self._missile_manager.draw()
-        if self._ready == True:
             self._components.draw()
+            self._missile_manager.draw()
+        # if self._ready == True:
         self._rocket.draw()
+        self.draw_stat()
+
+    def draw_stat(self):
+        self._draw_rocket_health()
+        self._draw_missile_count()
+
+    def _draw_rocket_health(self):
         arcade.draw_text(str(self._rocket.get_health()),
-                        self._width - 60 ,
-                        self._height - 30,
-                        arcade.color.BLACK, 20)
+                self._width//2 - 50, 30,
+                arcade.color.BLACK, font_size=33)
+
+    def _draw_missile_count(self):
+        arcade.draw_text(str(f'Word: {self._missile_count}'),
+                self._width//2 + 180, 25,
+                arcade.color.BLACK, font_size=22)
 
     def update(self, delta):
         if self._state == World.STATE_FROZEN:
@@ -489,11 +515,13 @@ class World:
         self._missile_manager.update(self._type)
         self._type = 0
 
-    def update_score(self):
-        self._score += self._missile_manager.get_score()
+    def update_missile_count(self):
+        self._missile_count += self._missile_manager.get_missile_count()
+        self._missile_manager.reset_missile_count()
     
     def update_health(self):
-        self.rocket.update_health(self._missile_manager.get_damage())
+        self._rocket.update_health(self._missile_manager.get_damage())
+        self._missile_manager.reset_damage()
 
     def on_key_press(self, key, key_modifiers):
         if key == arcade.key.ESCAPE:
