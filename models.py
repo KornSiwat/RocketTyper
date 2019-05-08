@@ -36,14 +36,14 @@ class Cloud(arcade.Sprite):
     def update(self):
         self.center_y -= self._speed
         if self.out_of_screen():
-            self.reuse()
+            self._reuse()
 
     def out_of_screen(self):
-        if self.center_y + 47 < 0:
+        if self.center_y + self.top < 0:
             return True
         return False
 
-    def reuse(self):
+    def _reuse(self):
         self.center_x = randint(100, self._screen_width)
         self.center_y = self._screen_height + 300
 
@@ -56,11 +56,18 @@ class Rocket(arcade.AnimatedTimeSprite):
         self._health = 1000
         self._ready = False
         self._speed = SPEED
+        self._active = True
 
     def update(self):
         self.update_animation()
         if self._ready == False:
-            self.move_up()
+            self._move_up()
+        if self._active == False:
+            self._move_down()
+        self._check_dead()
+
+    def update_health(self, damage):
+        self._health -= damage
 
     def get_health(self):
         return self._health
@@ -68,15 +75,14 @@ class Rocket(arcade.AnimatedTimeSprite):
     def ready(self):
         self._ready = True
 
-    def die(self):
+    def _check_dead(self):
         if self._health <= 0:
-            return True
-        return False
+            self._active = False
 
-    def move_up(self):
+    def _move_up(self):
         self.center_y += self._speed
 
-    def move_down(self):
+    def _move_down(self):
         self.center_y -= self._speed
 
 class Missile(arcade.Sprite):
@@ -86,105 +92,121 @@ class Missile(arcade.Sprite):
         self.set_texture(0)
         self.center_x = x
         self.center_y = y
-        self.target = target - 10
-        self.distance = 60
-        self.word = Word(self.right , self.center_y - 5, word)
-        self.first_alphabet = ord(self.word.char_list[0].char)
-        self._select = False
-        self.active = True
-        self.hit = True
-        self.damage = damage
-        self.length = self.right + 10 * len(self.word.char_list)
+        self._target = target - 10
+        self._distance = 60
+        self._word = Word(self.right , self.center_y - 5, word)
+        self._first_alphabet = ord(self._word.get_current_char().get_char())
+        self._selected = False
+        self._active = True
+        self._hit = True
+        self._damage = damage
+        self._speed = 0.5
 
-    def is_select(self):
-        return self._select
+    def is_selected(self):
+        return self._selected
 
     def explode(self):
-        self.active = False
-        self._select = False
+        self._active = False
+        self._selected = False
+        print('boom')
 
     def draw_with_word(self):
         self.draw()
-        self.word.draw()
+        self._word.draw()
 
     def update_pos(self):
-        if self.left >= self.target:
-            self.center_x -= 0.5
-            self.word.update_pos(self.center_x + self.distance)
+        if self.left >= self._target:
+            self.center_x -= self._speed
+            self._word.update_pos(self.center_x + self._distance)
             self.check_word()
         else:
             self.explode()
 
     def update_key(self, key):
-        self.word.update_key(key)
+        self._word.update_key(key)
 
     def check_word(self):
-        if self.word.is_select() == True:
-            self._select = True
-        if self.word.is_completed() == True:
-            self.hit = False
+        if self._word.is_selected() == True:
+            self._selected = True
+        if self._word.is_completed() == True:
+            self._hit = False
             self.explode()
 
     def is_active(self):
-        return self.active
+        return self._active
 
     def get_damage(self):
-        if self.hit == True:
-            return self.damage
+        if self._hit == True:
+            return self._damage
         return 0
 
 class Word():
     def __init__(self,x ,y, word):
-        self.x = x
-        self.y = y
-        self.char_list = list(map(lambda x: Char(x), word))
-        self.current_char = self.char_list[0]
-        self.complete = False
-        self._select = False
+        self._x = x
+        self._y = y
+        self._word = word
+        self._char_list = list(map(lambda x: Char(x), word))
+        self._current_char = self._char_list[0]
+        self._completed = False
+        self._selected = False
 
     def draw(self):
-        for index, elem in enumerate(self.char_list):
-            arcade.draw_text(str(elem.char),self.x + 10 * index, self.y, elem.color, font_size=16)
+        white_text = self._word
+        red_text = ''
+        for char in self._char_list:
+            if char.is_active()== True:
+                red_text += ' '
+            else:
+                red_text += char.get_char()
+        arcade.draw_text(white_text, self._x, self._y, color=arcade.color.WHITE, font_size=16)
+        arcade.draw_text(red_text, self._x, self._y, color=arcade.color.RED, font_size=16)
 
     def update_pos(self, new_x):
-        self.x = new_x
+        self._x = new_x
 
     def update_key(self, key):
-        for char in self.char_list:
-            if char.active == True:
-                self.current_char = char
+        for char in self._char_list:
+            if char.is_active() == True:
+                self._current_char = char
                 break
         else:
-            self.complete = True
-        self.check_key(key)
+            self._completed = True
+        self._check_key(key)
 
-    def check_key(self, key):
-        if key == ord(self.current_char.char):
-            self.current_char.is_typed()
-            self._select = True
+    def _check_key(self, key):
+        if key == ord(self._current_char.get_char()):
+            self._current_char.is_typed()
+            self._selected = True
 
-    def is_select(self):
-        return self._select
+    def is_selected(self):
+        return self._selected
 
     def is_completed(self):
-        return self.complete
+        return self._completed
+
+    def get_current_char(self):
+        return self._current_char
 
     def print_word(self):
-        for char in self.char_list:
+        for char in self._char_list:
             print(char)
 
 class Char():
     def __init__(self,char):
-        self.char = char
-        self.color = arcade.color.WHITE
-        self.active = True    
+        self._char = char
+        self._active = True    
 
     def is_typed(self):
-        self.color = arcade.color.RED
-        self.active = False
+        self._active = False
+
+    def is_active(self):
+        return self._active
+
+    def get_char(self):
+        return self._char
 
     def __str__(self):
-        return self.char
+        return self._char
 
 class MissileManager():
     def __init__(self, width, height, target=0, level=0, missile_height=100):
@@ -198,6 +220,8 @@ class MissileManager():
         self._timer = time.time()
         self._wait_time = 3
         self._current_slot = None
+        self._damage = 0
+        self._missile_count = 0
 
     def add_word_manager(self, path):
         self._word_manager = WordManager(ReadWordFile(path).get_list())
@@ -208,16 +232,32 @@ class MissileManager():
 
     def update(self, key):
         self._check_deploy_time()
+        self._update_pos()
+        self._key_handle(key)
+
+    def _update_pos(self):
         for slot in self._get_used_slot():
             slot.update_pos()
-        if self._current_slot == None or self._current_slot.is_select() == False:
+
+    def _key_handle(self,key):
+        if self._current_slot == None or self._current_slot.is_selected() == False:
             for slot in self._get_used_slot():
                 slot.update_key(key)
-                if slot.is_select() == True:
+                if slot.is_selected() == True:
                     self._current_slot = slot
                     break
         elif self._current_slot.is_use() == True:
             self._current_slot.update_key(key)
+
+    def _update_damage(self):
+        for slot in self._slot_list:
+            self._damage += slot.get_damage()
+            slot.reset_damage()
+
+    def _update_missile_count(self):
+        for slot in self._slot_list:
+            self._missile_count += slot.get_missile_count()
+            slot.reset_missile_count()
 
     def _check_deploy_time(self):
         if time.time() - self._timer >= self._wait_time:
@@ -243,13 +283,14 @@ class MissileManager():
 class Slot():
     def __init__(self, x, y, target):
         self._in_use = False
-        self._select = False
+        self._selected = False
         self._x_points = x
         self._y_pos = y
         self._missile = None
         self._wait_pixel = 0
         self._target = target
         self._damage = 0
+        self._missile_count = 0
 
     def create_missile(self, word):
         self._missile = Missile(self._x_points[1], self._y_pos, word=word, target=self._target)
@@ -258,7 +299,7 @@ class Slot():
     def draw(self):
         if self._missile != None:
             self._missile.draw_with_word()
-            if self._missile.active == False:
+            if self._missile.is_active() == False:
                 self._missile = None
 
     def update_pos(self):
@@ -271,11 +312,11 @@ class Slot():
     def is_use(self):
         return self._in_use
 
-    def is_select(self):
-        return self._select
+    def is_selected(self):
+        return self._selected
 
     def check_missile_status(self):
-        if self._missile.is_select() == True:
+        if self._missile.is_selected() == True:
             self._select = True
         if self._missile.is_active() == False:
             self.delete_missile()
@@ -284,7 +325,20 @@ class Slot():
         self._damage += self._missile.get_damage()
         self._missile = None
         self._in_use = False
-        self._select = False
+        self._selected = False
+        self._missile_count += 1
+
+    def get_damage(self):
+        return self._damage
+
+    def reset_damage(self):
+        self._damage = 0
+
+    def get_missile_count(self):
+        return self._missile_count
+
+    def reset_missile_count(self):
+        self._missile_count = 0
 
 class ReadWordFile():
     def __init__(self, file_name=''):
@@ -301,7 +355,7 @@ class ReadWordFile():
         return self._catagorized_word
 
 class WordManager():
-    def __init__(self, word_dict, level=1):
+    def __init__(self, word_dict, level=0):
         self._level = level
         self._used = []
         self._unused = list(string.ascii_lowercase)
@@ -334,6 +388,9 @@ class WordManager():
         self._unused.remove(alphabet)
         return choice(self._short_word[alphabet] + self._long_word[alphabet] * self._level)
 
+    def increase_level(self):
+        self._level += 1
+
     def recycle(self, alphabet):
         self._unused.append(alphabet)
         self._used.remove(alphabet)
@@ -354,10 +411,8 @@ class Component_list():
             [component.update() for component in self._components]
             [component.update_animation() for component in self._components]
 
-
     def print_component(self):
         print(self._components)
-        
 
 class World:
     STATE_FROZEN = 1
@@ -433,6 +488,12 @@ class World:
         self._components.update()
         self._missile_manager.update(self._type)
         self._type = 0
+
+    def update_score(self):
+        self._score += self._missile_manager.get_score()
+    
+    def update_health(self):
+        self.rocket.update_health(self._missile_manager.get_damage())
 
     def on_key_press(self, key, key_modifiers):
         if key == arcade.key.ESCAPE:
