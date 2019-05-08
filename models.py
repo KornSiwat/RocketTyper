@@ -7,31 +7,34 @@ SPEED = 7
 
 class MenuChoiceSprite(arcade.AnimatedTimeSprite):
     def __init__(self, *args, **kwargs):
-        self.is_select = False
+        self._selected = False
 
         super().__init__(*args, **kwargs)
 
     def select(self):
-        self.is_select = True
+        self._selected = True
 
     def unselect(self):
-        self.is_select = False
+        self._selected = False
+
+    def is_selected(self):
+        return self._selected
 
 class Cloud(arcade.Sprite):
     INSTANCE_NUMBER = 0
 
     def __init__(self, width, height, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.screen_height = height
-        self.screen_width = width
-        self.speed = SPEED
-        self.center_x = randint(0, self.screen_width)
-        self.center_y = self.screen_height + (self.INSTANCE_NUMBER * 300)
+        self._screen_height = height
+        self._screen_width = width
+        self._speed = SPEED
+        self.center_x = randint(0, self._screen_width)
+        self.center_y = self._screen_height + (self.INSTANCE_NUMBER * 300)
 
         Cloud.INSTANCE_NUMBER += 1
 
     def update(self):
-        self.center_y -= self.speed
+        self.center_y -= self._speed
         if self.out_of_screen():
             self.reuse()
 
@@ -41,8 +44,8 @@ class Cloud(arcade.Sprite):
         return False
 
     def reuse(self):
-        self.center_x = randint(100, self.screen_width)
-        self.center_y = self.screen_height + 300
+        self.center_x = randint(100, self._screen_width)
+        self.center_y = self._screen_height + 300
 
 class Rocket(arcade.AnimatedTimeSprite):
 
@@ -50,28 +53,31 @@ class Rocket(arcade.AnimatedTimeSprite):
         super().__init__(*args, **kwargs)
         self.center_x = x
         self.center_y = y
-        self.health = 1000
-        self.is_ready = False
-        self.speed = SPEED
+        self._health = 1000
+        self._ready = False
+        self._speed = SPEED
 
     def update(self):
         self.update_animation()
-        if self.is_ready == False:
+        if self._ready == False:
             self.move_up()
 
+    def get_health(self):
+        return self._health
+
     def ready(self):
-        self.is_ready = True
+        self._ready = True
 
     def die(self):
-        if self.health <= 0:
+        if self._health <= 0:
             return True
         return False
 
     def move_up(self):
-        self.center_y += self.speed
+        self.center_y += self._speed
 
     def move_down(self):
-        self.center_y -= self.speed
+        self.center_y -= self._speed
 
 class Missile(arcade.Sprite):
     def __init__(self, x, y, word='',target=0, damage=10,*args, **kwargs):
@@ -181,51 +187,56 @@ class Char():
         return self.char
 
 class MissileManager():
-    def __init__(self, width, height, target, difficulty=0, missile_height=100):
-        self.attack_zone_x = [target, width]
-        self.attack_zone_y = [150, height]
-        self.difficulty = difficulty
-        self.slot_list = []
-        for y_pos in range(self.attack_zone_y[1],200, -(missile_height)):
-            self.slot_list.append(Slot(self.attack_zone_x, y_pos-50, target))
-        self.word_list = None
-        self.timer = time.time()
-        self.wait_time = 3
-        self.current_slot = None
+    def __init__(self, width, height, target=0, level=0, missile_height=100):
+        self._target = target
+        self._attack_zone_x = [target, width]
+        self._attack_zone_y = [150, height]
+        self._level = level
+        self._slot_list = []
+        for y_pos in range(self._attack_zone_y[1],200, -(missile_height)):
+            self._slot_list.append(Slot(self._attack_zone_x, y_pos-50, self._target))
+        self._timer = time.time()
+        self._wait_time = 3
+        self._current_slot = None
 
-    def add_word_list(self, lst):
-        self.word_list = lst
+    def add_word_manager(self, path):
+        self._word_manager = WordManager(path)
+    
+    def draw(self):
+        for slot in self._slot_list:
+            slot.draw()
 
     def update(self, key):
         self.check_deploy_time()
-        for slot in self.get_used_slot():
+        for slot in self._get_used_slot():
             slot.update_pos()
-        if self.current_slot == None or self.current_slot.is_select() == False:
-            for slot in self.get_used_slot():
+        if self._current_slot == None or self._current_slot.is_select() == False:
+            for slot in self._get_used_slot():
                 slot.update_key(key)
                 if slot.is_select() == True:
-                    self.current_slot = slot
+                    self._current_slot = slot
                     break
-        elif self.current_slot.is_use() == True:
-            self.current_slot.update_key(key)
+        elif self._current_slot.is_use() == True:
+            self._current_slot.update_key(key)
 
     def check_deploy_time(self):
-        if time.time() - self.timer >= self.wait_time:
+        if time.time() - self._timer >= self._wait_time:
             self.deploy()
-            self.timer = time.time()
+            self._timer = time.time()
 
     def deploy(self):
         if self.have_free_slot() == True:
-            choice(self.get_free_slot()).create_missile(choice(self.word_list[choice([x for x in self.word_list])]))
+            # choice(self.get_free_slot()).create_missile(choice(self.word_list[choice([x for x in self.word_list])]))
+            pass
 
-    def get_free_slot(self):
-        return [slot for slot in self.slot_list if slot.is_use() == False]
+    def _get_free_slot(self):
+        return [slot for slot in self._slot_list if slot.is_use() == False]
 
-    def get_used_slot(self):
-        return [slot for slot in self.slot_list if slot.is_use() == True]
+    def _get_used_slot(self):
+        return [slot for slot in self._slot_list if slot.is_use() == True]
 
     def have_free_slot(self):
-        for slot in self.slot_list:
+        for slot in self._slot_list:
             if slot.is_use() == False:
                 return True
         return False
@@ -234,29 +245,29 @@ class Slot():
     def __init__(self, x, y, target):
         self._in_use = False
         self._select = False
-        self.x_points = x
-        self.y_pos = y
-        self.missile = None
-        self.wait_pixel = 0
-        self.target = target
-        self.damage = 0
+        self._x_points = x
+        self._y_pos = y
+        self._missile = None
+        self._wait_pixel = 0
+        self._target = target
+        self._damage = 0
 
     def create_missile(self, word):
-        self.missile = Missile(self.x_points[1], self.y_pos, word=word, target=self.target)
+        self._missile = Missile(self._x_points[1], self._y_pos, word=word, target=self._target)
         self._in_use = True
 
     def draw(self):
-        if self.missile != None:
-            self.missile.draw_with_word()
-            if self.missile.active == False:
-                self.missile = None
+        if self._missile != None:
+            self._missile.draw_with_word()
+            if self._missile.active == False:
+                self._missile = None
 
     def update_pos(self):
-        self.missile.update_pos()
+        self._missile.update_pos()
         self.check_missile_status()
 
     def update_key(self, key):
-        self.missile.update_key(key)
+        self._missile.update_key(key)
 
     def is_use(self):
         return self._in_use
@@ -265,35 +276,36 @@ class Slot():
         return self._select
 
     def check_missile_status(self):
-        if self.missile.is_select() == True:
+        if self._missile.is_select() == True:
             self._select = True
-        if self.missile.is_active() == False:
+        if self._missile.is_active() == False:
             self.delete_missile()
 
     def delete_missile(self):
-        self.damage += self.missile.get_damage()
-        self.missile = None
+        self._damage += self._missile.get_damage()
+        self._missile = None
         self._in_use = False
         self._select = False
 
 class ReadWordFile():
     def __init__(self, file_name=''):
         with open(file_name, 'r') as Fin:
-            self.raw_word = [x.strip() for x in Fin.readlines()]
-        self.catagorized_word = {}
-        for word in self.raw_word:
-            if word[0].lower() not in self.catagorized_word:
-                self.catagorized_word[word[0].lower()] = [word]
+            self._raw_word = [x.strip() for x in Fin.readlines()]
+        self._catagorized_word = {}
+        for word in self._raw_word:
+            if word[0].lower() not in self._catagorized_word:
+                self._catagorized_word[word[0].lower()] = [word]
             else:
-                self.catagorized_word[word[0].lower()].append(word)
+                self._catagorized_word[word[0].lower()].append(word)
 
     def get_list(self):
-        return self.catagorized_word
+        return self._catagorized_word
 
 class WordManager():
-    def __init__(self, word_dict):
+    def __init__(self, word_dict, level=1):
+        self._level = level
         self._used = []
-        self._unused = []
+        self._unused = list(string.ascii_lowercase)
         self._long_word = dict()
         self._short_word = dict()
         for alphabet in word_dict:
@@ -306,82 +318,121 @@ class WordManager():
                     self._short_word[alphabet].append(word)
 
     def _get_short(self):
-        self._result = dict()
+        result = dict()
         for alphabet in self._unused:
-            self._result[alphabet] = self._short_word[alphabet]
-        return self._result
+            result[alphabet] = self._short_word[alphabet]
+        return result
 
     def _get_long(self):
-        self._result = dict()
+        result = dict()
         for alphabet in self._unused:
-            self._result[alphabet] = self._short_word[alphabet]
-        return self._result
+            result[alphabet] = self._short_word[alphabet]
+        return result
 
     def generate(self):
-        pass
+        alphabet = choice(self._unused)
+        self._used.append(alphabet)
+        self._unused.remove(alphabet)
+        return choice(self._short_word[alphabet] + self._long_word * self._level)
 
+    def recycle(self, alphabet):
+        self._unused.append(alphabet)
+        self._used.remove(alphabet)
+
+class Component_list():
+    def __init__(self):
+        self._components = []
+
+    def draw(self):
+        if len(self._components) > 0:
+            [component.draw() for component in self._components]
+
+    def add_component(self, component):
+        self._components.append(component)
+
+    def update(self):
+        if len(self._components) > 0:
+            [component.update() for component in self._components]
+            [component.update_animation() for component in self._components]
+
+
+    def print_component(self):
+        print(self._components)
+        
 
 class World:
     STATE_FROZEN = 1
     STATE_STARTED = 2
 
     def __init__(self, width, height, cloud_amount=5):
-        self.width = width
-        self.height = height
+        self._width = width
+        self._height = height
 
-        self.rocket = None
-        self.score = 0
-        self.altitude = 0
-        self.is_ready = False
+        self._rocket = None
+        self._score = 0
+        self._altitude = 0
+        self._ready = False
 
-        self.state = World.STATE_FROZEN
+        self._state = World.STATE_FROZEN
 
-        self.cloud_amount = cloud_amount
-        self.cloud_list = arcade.SpriteList()
-        for _ in range(self.cloud_amount):
-            self.cloud_list.append(Cloud(self.width, self.height))
-        self.type = None
+        self._components = Component_list()
+        self._cloud_amount = cloud_amount
+        self._cloud_list = arcade.SpriteList()
+        self._cloud_list.sprite_list = list(map(lambda x : Cloud(self._width, self._height), range(self._cloud_amount)))
+        self._components.add_component(self._cloud_list)
+        self._type = None
 
-    def add_missile_manager(self):
-        self.missile_manager = MissileManager(self.width, self.height, target=0)
+    def add_rocket(self, rocket):
+        self._rocket = rocket
 
-    def add_word_list(self, path):
-        self.missile_manager.add_word_list(ReadWordFile(path).get_list())
+    def add_missile_manager(self, word_path):
+        self._missile_manager = MissileManager(self._width, self._height, target=self._rocket.right)
+
+    def add_component(self, component):
+        self._components.add_component(component)
+
+    def add_cloud_texture(self, texture, scale=1):
+        for cloud in self._cloud_list:
+            cloud.textures.append(arcade.load_texture(texture,scale=scale))
+            cloud.set_texture(0)
 
     def start(self):
-        self.state = World.STATE_STARTED
+        self._state = World.STATE_STARTED
 
     def freeze(self):
-        self.state = World.STATE_FROZEN
+        self._state = World.STATE_FROZEN
 
     def check_start_pos(self):
-        if self.rocket.center_y >= self.height//2:
+        if self._rocket.center_y >= self._height//2:
             self.ready()
-            self.rocket.ready()
+            self._rocket.ready()
 
     def ready(self):
-        self.is_ready = True
+        self._ready = True
 
     def is_started(self):
-        return self.state == World.STATE_STARTED
+        return self._state == World.STATE_STARTED
+
+    def draw(self):
+        if self.is_started() == True:
+            self._missile_manager.draw()
+        if self._ready == True:
+            self._components.draw()
+        self._rocket.draw()
+        arcade.draw_text(str(self._rocket.get_health()),
+                        self._width - 60 ,
+                        self._height - 30,
+                        arcade.color.BLACK, 20)
 
     def update(self, delta):
-        if self.state == World.STATE_FROZEN:
+        if self._state == World.STATE_FROZEN:
             return
-        self.rocket.update()
-        self.rocket.update_animation()
+        self._rocket.update()
+        self._rocket.update_animation()
         self.check_start_pos()
-        for cloud in self.cloud_list:
-            cloud.update()
-        self.missile_manager.update(self.type)
-        self.type = 0
-
-    def any_selected(self):
-        for slot in self.missile_manager.slot_list:
-            if slot.missile != None:
-                if slot.missile.selected == True:
-                    return True
-        return False
+        self._components.update()
+        self._missile_manager.update(self._type)
+        self._type = 0
 
     def on_key_press(self, key, key_modifiers):
         if key == arcade.key.ESCAPE:
@@ -390,5 +441,4 @@ class World:
             else:
                 self.start()
         else:
-            self.type = key
-            print(self.type)
+            self._type = key
