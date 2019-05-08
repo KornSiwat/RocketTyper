@@ -200,14 +200,14 @@ class MissileManager():
         self._current_slot = None
 
     def add_word_manager(self, path):
-        self._word_manager = WordManager(path)
+        self._word_manager = WordManager(ReadWordFile(path).get_list())
     
     def draw(self):
         for slot in self._slot_list:
             slot.draw()
 
     def update(self, key):
-        self.check_deploy_time()
+        self._check_deploy_time()
         for slot in self._get_used_slot():
             slot.update_pos()
         if self._current_slot == None or self._current_slot.is_select() == False:
@@ -219,15 +219,14 @@ class MissileManager():
         elif self._current_slot.is_use() == True:
             self._current_slot.update_key(key)
 
-    def check_deploy_time(self):
+    def _check_deploy_time(self):
         if time.time() - self._timer >= self._wait_time:
-            self.deploy()
+            self._deploy()
             self._timer = time.time()
 
-    def deploy(self):
+    def _deploy(self):
         if self.have_free_slot() == True:
-            # choice(self.get_free_slot()).create_missile(choice(self.word_list[choice([x for x in self.word_list])]))
-            pass
+            choice(self._get_free_slot()).create_missile(self._word_manager.generate())
 
     def _get_free_slot(self):
         return [slot for slot in self._slot_list if slot.is_use() == False]
@@ -333,7 +332,7 @@ class WordManager():
         alphabet = choice(self._unused)
         self._used.append(alphabet)
         self._unused.remove(alphabet)
-        return choice(self._short_word[alphabet] + self._long_word * self._level)
+        return choice(self._short_word[alphabet] + self._long_word[alphabet] * self._level)
 
     def recycle(self, alphabet):
         self._unused.append(alphabet)
@@ -387,6 +386,7 @@ class World:
 
     def add_missile_manager(self, word_path):
         self._missile_manager = MissileManager(self._width, self._height, target=self._rocket.right)
+        self._missile_manager.add_word_manager(word_path)
 
     def add_component(self, component):
         self._components.add_component(component)
