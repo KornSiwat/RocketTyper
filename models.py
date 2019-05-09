@@ -94,13 +94,13 @@ class Missile(arcade.Sprite):
         self.center_y = y
         self._target = target - 10
         self._distance = 60
+        self._first_alphabet = word[0]
         self._word = Word(self.right , self.center_y - 5, word)
-        self._first_alphabet = ord(self._word.get_current_char().get_char())
         self._selected = False
         self._active = True
         self._hit = True
         self._damage = damage
-        self._speed = 0.5
+        self._speed = 1.5
 
     def is_selected(self):
         return self._selected
@@ -108,7 +108,6 @@ class Missile(arcade.Sprite):
     def explode(self):
         self._active = False
         self._selected = False
-        print('boom')
 
     def draw_with_word(self):
         self.draw()
@@ -139,6 +138,9 @@ class Missile(arcade.Sprite):
         if self._hit == True:
             return self._damage
         return 0
+
+    def get_first_alphabet(self):
+        return self._first_alphabet
 
 class Word():
     def __init__(self,x ,y, word):
@@ -225,6 +227,8 @@ class MissileManager():
 
     def add_word_manager(self, path):
         self._word_manager = WordManager(ReadWordFile(path).get_list())
+        for slot in self._slot_list:
+            slot.add_word_manager(self._word_manager)
     
     def draw(self):
         for slot in self._slot_list:
@@ -296,6 +300,7 @@ class MissileManager():
 
 class Slot():
     def __init__(self, x, y, target):
+        self._word_manager = None
         self._in_use = False
         self._selected = False
         self._x_points = x
@@ -305,6 +310,9 @@ class Slot():
         self._target = target
         self._damage = 0
         self._missile_count = 0
+
+    def add_word_manager(self, word_managaer):
+        self._word_manager = word_managaer
 
     def create_missile(self, word):
         self._missile = Missile(self._x_points[1], self._y_pos, word=word, target=self._target)
@@ -337,6 +345,7 @@ class Slot():
 
     def delete_missile(self):
         self._damage += self._missile.get_damage()
+        self._word_manager.recycle(self._missile.get_first_alphabet())
         self._missile = None
         self._in_use = False
         self._selected = False
@@ -484,11 +493,11 @@ class World:
         return self._state == World.STATE_STARTED
 
     def draw(self):
+        self._rocket.draw()
         if self.is_started() == True:
             self._components.draw()
             self._missile_manager.draw()
         # if self._ready == True:
-        self._rocket.draw()
         self.draw_stat()
 
     def draw_stat(self):
@@ -514,12 +523,14 @@ class World:
         self._components.update()
         self._missile_manager.update(self._type)
         self._type = 0
+        self._update_health()
+        self._update_missile_count()
 
-    def update_missile_count(self):
+    def _update_missile_count(self):
         self._missile_count += self._missile_manager.get_missile_count()
         self._missile_manager.reset_missile_count()
     
-    def update_health(self):
+    def _update_health(self):
         self._rocket.update_health(self._missile_manager.get_damage())
         self._missile_manager.reset_damage()
 
