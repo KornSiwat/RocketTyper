@@ -16,8 +16,8 @@ These resources are needed in order to run the program:
 
 Open the Terminal and type the following command:
 
-        git clone https://github.com/KornSiwat/internship_program_2019
-
+        git clone https://github.com/KornSiwat/RocketTyper
+        
 ## How to run
 
 ### Step 1
