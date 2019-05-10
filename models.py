@@ -516,7 +516,7 @@ class ScoreFileRW():
 
     def write(self, score_lst):
         with open( self.file_name, 'a') as file:
-            file.write(f'\n{score_lst[0]},{score_lst[1]},{score_lst[2]}')
+            file.write(f'\n{score_lst[0]},{score_lst[1]:.2f},{score_lst[2]:.2f}')
 
     def get_score(self):
         return self.score_list
@@ -525,7 +525,8 @@ class ScoreFileRW():
         return sorted(self.score_list,key=lambda x: x[1], reverse=True)[0]
 
     def get_latest_five(self):
-        return self.score_list[-5:-1]
+        result = self.score_list[::-1]
+        return result[0:5]
 
 class World:
     STATE_FROZEN = 1
@@ -704,10 +705,4 @@ class World:
         return self._restart
 
     def on_key_press(self, key, key_modifiers):
-        if key == arcade.key.ESCAPE:
-            if self.is_started():
-                self.freeze()
-            else:
-                self.start()
-        else:
             self._type = key

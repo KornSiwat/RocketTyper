@@ -21,11 +21,14 @@ choices = {
 class RocketTyperWindow(arcade.Window):
     def __init__(self, width, height):
         super().__init__(width, height)
+        self.size_width = width
+        self.size_height = height
 
         self.current_route = routes['menu']
         self.selecting_choice = 0
 
         self.background = arcade.load_texture("images/background.png")
+        self.gray_background = arcade.load_texture("images/result.png")
         self.score_rw = ScoreFileRW('score.txt')
         self.score_rw.read()
         self.menu_setup()
@@ -118,6 +121,10 @@ class RocketTyperWindow(arcade.Window):
             self.draw_menu()
         elif self.current_route == routes['game']:
             self.draw_game()
+        elif self.current_route == routes['instruction']:
+            self.draw_instruction()
+        elif self.current_route == routes['scoreboard']:
+            self.draw_scoreboard()
 
     def draw_menu(self):
         self.rocket_menu.draw()
@@ -125,6 +132,65 @@ class RocketTyperWindow(arcade.Window):
             
     def draw_game(self):
         self.world.draw()
+
+    def draw_instruction(self):
+        arcade.draw_texture_rectangle(self.width//2 , self.height//2 ,self.width-250, self.height-150,self.gray_background)
+        arcade.draw_text(f'How To Play',
+                self._width//2 - 110, self._height//2 + 195,
+                arcade.color.BLACK, font_size=35)
+        arcade.draw_text(f'The Rocket has a mission to travel to the Moon.',
+                self._width//2 - 320, self._height//2 + 110,
+                arcade.color.BLACK, font_size=23)
+        arcade.draw_text(f'On its way, there\'re enemies that want to stop ',
+                self._width//2 - 320, self._height//2 + 30,
+                arcade.color.BLACK, font_size=23)
+        arcade.draw_text(f' the mission. Help the rocket complete its mission ',
+                self._width//2 - 320, self._height//2 - 50,
+                arcade.color.BLACK, font_size=23)
+
+        arcade.draw_text(f'by typing the word to destroy an incoming missiles.',
+                self._width//2 - 320, self._height//2 - 130,
+                arcade.color.BLACK, font_size=23)
+
+        arcade.draw_text('ESC To Menu',
+                self._width//2 - 320, self._height//2 - 210,
+                arcade.color.BLACK, font_size=15)
+
+    def draw_scoreboard(self):
+        arcade.draw_texture_rectangle(self.width//2 , self.height//2 ,self.width-250, self.height-150,self.gray_background)
+        arcade.draw_text(f'Scoreboard',
+                self._width//2 - 110, self._height//2 + 195,
+                arcade.color.BLACK, font_size=35)
+
+        arcade.draw_text('Recent Scores',
+                self._width//2 - 320, self._height//2 + 160,
+                arcade.color.BLACK, font_size=20)
+
+        arcade.draw_text('ESC To Menu',
+                self._width//2 - 320, self._height//2 - 210,
+                arcade.color.BLACK, font_size=15)
+
+
+        arcade.draw_text(f'|  No. |  Words  |  Word Per Minute  | Total Time |',
+                self._width//2 - 320, self._height//2 + 120,
+                arcade.color.BLACK, font_size=23)
+        for no, score in enumerate(self.score_rw.get_latest_five(),1):
+            if len(str(score[1])) == 5:
+                dummy = ' '
+            else:
+                dummy = ''
+            arcade.draw_text(f'|   {no}    |    {score[0]:^5}   |  {score[2]:^26}  |  {score[1]:^10}{dummy}  |',
+                    self._width//2 - 320, self._height//2 + 120 - 30*no,
+                    arcade.color.BLACK, font_size=23)
+
+        arcade.draw_text(f'Local Best Time: {self.score_rw.get_best()[1]:.2f} s',
+                self._width//2 - 320, self._height//2 - 100,
+                arcade.color.BLACK, font_size=23)
+
+        arcade.draw_text(f'World Best Time: Feature Coming Soon',
+                self._width//2 - 320, self._height//2 - 140,
+                arcade.color.BLACK, font_size=23)
+
 
     def update_selected_choice(self):
         for choice in self.choice_list:
@@ -153,9 +219,16 @@ class RocketTyperWindow(arcade.Window):
         elif self.current_route == routes['game']:
             if self.world.get_restart() == True:
                 if key == arcade.key.ENTER:
+                    self.game_setup(self.size_width,self.size_height)
                     self.current_route = routes['menu']
             else:
                 self.world.on_key_press(key,key_modifiers)
+        elif self.current_route == routes['instruction']:
+            if key == arcade.key.ESCAPE:
+                self.current_route = routes['menu']
+        elif self.current_route == routes['scoreboard']:
+            if key == arcade.key.ESCAPE:
+                self.current_route = routes['menu']
 
 if __name__ == '__main__':
     window = RocketTyperWindow(SCREEN_WIDTH, SCREEN_HEIGHT)
