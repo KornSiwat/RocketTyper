@@ -1,5 +1,5 @@
 import arcade
-from models import World, Rocket, MenuChoiceSprite, Missile
+from models import World, Rocket, MenuChoiceSprite, Missile,ScoreFileRW
 import time
 
 SCREEN_WIDTH = 1000
@@ -26,6 +26,8 @@ class RocketTyperWindow(arcade.Window):
         self.selecting_choice = 0
 
         self.background = arcade.load_texture("images/background.png")
+        self.score_rw = ScoreFileRW('score.txt')
+        self.score_rw.read()
         self.menu_setup()
         self.game_setup(width,height)
 
@@ -94,6 +96,7 @@ class RocketTyperWindow(arcade.Window):
 
         self.world.add_missile_manager('word/word.txt')
         self.world.add_cloud_texture('images/cloud.png')
+        self.world.add_score_rw(self.score_rw)
 
     def update(self, delta):
         if self.current_route == routes['menu']:
@@ -148,7 +151,11 @@ class RocketTyperWindow(arcade.Window):
                 if self.current_route == routes['game']:
                     self.world.start()
         elif self.current_route == routes['game']:
-            self.world.on_key_press(key,key_modifiers)
+            if self.world.get_restart() == True:
+                if key == arcade.key.ENTER:
+                    self.current_route = routes['menu']
+            else:
+                self.world.on_key_press(key,key_modifiers)
 
 if __name__ == '__main__':
     window = RocketTyperWindow(SCREEN_WIDTH, SCREEN_HEIGHT)

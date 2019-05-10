@@ -503,18 +503,29 @@ class ScoreFileRW():
 
     def __init__(self,name):
         self.file_name = name
+        self.score_list = []
 
     def read(self):
         with open( self.file_name , 'r') as file:
             file = file.readlines()
-            score_list = [x.strip().split(',') for x in file if x != '']
-        for elem in score_list:
-            elem[1] = int(elem[1])
-        return score_list
+            score_list = [x.strip().split(',') for x in file if len(x) > 1]
+        for line in score_list:
+            for i in range(len(line)):
+                line[i] = float(line[i])
+        self.score_list = score_list
 
-    def write(self, score_obj):
+    def write(self, score_lst):
         with open( self.file_name, 'a') as file:
-            file.write(f'{score_obj.name},{score_obj.score}\n')
+            file.write(f'\n{score_lst[0]},{score_lst[1]},{score_lst[2]}')
+
+    def get_score(self):
+        return self.score_list
+
+    def get_best(self):
+        return sorted(self.score_list,key=lambda x: x[1], reverse=True)[0]
+
+    def get_latest_five(self):
+        return self.score_list[-5:-1]
 
 class World:
     STATE_FROZEN = 1
@@ -530,6 +541,8 @@ class World:
         self._next_level_time = 10
         self._ready = False
         self._gameover = False
+        self._score_witten = False
+        self._restart = False
 
         self._state = World.STATE_FROZEN
 
@@ -537,7 +550,6 @@ class World:
         self._cloud_amount = cloud_amount
         self._cloud_list = arcade.SpriteList()
         self._cloud_list.sprite_list = list(map(lambda x : Cloud(self._width, self._height), range(self._cloud_amount)))
-        # self._components.add_component(self._cloud_list)
         self._type = None
 
     def add_rocket(self, rocket):
@@ -546,6 +558,9 @@ class World:
     def add_missile_manager(self, word_path):
         self._missile_manager = MissileManager(self._width, self._height, target=self._rocket.right)
         self._missile_manager.add_word_manager(word_path)
+
+    def add_score_rw(self,obj):
+        self._score_rw = obj
 
     def add_component(self, component):
         self._components.add_component(component)
@@ -578,34 +593,50 @@ class World:
             self._cloud_list.draw()
         self._rocket.draw()
         if self._is_over() == False:
-
             arcade.draw_rectangle_filled(self._width//2, 35, 305, 55, color=arcade.color.WHITE)
-            arcade.draw_rectangle_filled(self._width//2, 35/100*self._rocket.get_health(), 305, 55/100*self._rocket.get_health(), color=arcade.color.RED)
+            arcade.draw_rectangle_filled(self._width//2, 35/100*self._rocket.get_health(), 305, 60/100*self._rocket.get_health(), color=arcade.color.ORANGE_RED)
             self._components.draw()
             self._draw_stat()
             self._missile_manager.draw()
-        if self._is_over() == True:
+        if self._is_over() == True and self._rocket._out_of_screen() == True:
             self._draw_gameover()
 
     def _draw_gameover(self):
-        arcade.draw_rectangle_filled(self._width//2,self._height//2,self._width-250, self._height-150, color=arcade.color.DARK_GRAY)
+        result = arcade.load_texture('images/result.png')
+        arcade.draw_texture_rectangle(self._width//2 , self._height//2 ,self._width-250, self._height-150,result)
         self._draw_gameover_stat()
+        if self._score_witten == False:
+            self._score_rw.write([self._missile_count, self._time, self._missile_count/(self._time/60)])
+            self._score_rw.read()
+            self._score_witten = True
+        self._restart = True
 
     def _draw_gameover_stat(self):
         arcade.draw_text(f'Result',
-                self._width//2 - 50, self._height//2 + 200,
-                arcade.color.BLACK, font_size=30)
+                self._width//2 - 50, self._height//2 + 195,
+                arcade.color.BLACK, font_size=35)
         arcade.draw_text(f'Total Words: {self._missile_count}',
-                self._width//2 - 200, self._height//2 + 80,
+                self._width//2 - 230, self._height//2 + 110,
                 arcade.color.BLACK, font_size=30)
         arcade.draw_text(f'Total Time: {self._time:.2f}',
-                self._width//2 - 200, self._height//2,
+                self._width//2 - 230, self._height//2 + 30,
                 arcade.color.BLACK, font_size=30)
         arcade.draw_text(f'Speed: {(self._missile_count/(self._time/60)):.2f} WPM',
-                self._width//2 - 200, self._height//2 - 80,
+                self._width//2 - 230, self._height//2 - 50,
+                arcade.color.BLACK, font_size=30)
+
+        arcade.draw_text(f'Local Best Time: {self._score_rw.get_best()[1]:.2f} s',
+                self._width//2 - 230, self._height//2 - 130,
+                arcade.color.BLACK, font_size=30)
+
+        arcade.draw_text('Press Enter To Go Back To Menu',
+                self._width//2 - 260, self._height//2 - 210,
                 arcade.color.BLACK, font_size=30)
 
     def _draw_stat(self):
+        arcade.draw_text('RocketTyper',
+                100, 25,
+                arcade.color.BLACK, font_size=25)
         self._draw_rocket_health()
         self._draw_missile_count()
         self._draw_time()
@@ -668,6 +699,9 @@ class World:
 
     def _is_ready(self):
         return self._ready
+
+    def get_restart(self):
+        return self._restart
 
     def on_key_press(self, key, key_modifiers):
         if key == arcade.key.ESCAPE:
