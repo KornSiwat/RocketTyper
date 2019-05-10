@@ -62,7 +62,7 @@ class Rocket(arcade.AnimatedTimeSprite):
         self.update_animation()
         if self._ready == False:
             self._move_up()
-        if self._active == False:
+        if self.is_over() == True and self._out_of_screen() == False:
             self._move_down()
         self._check_dead()
 
@@ -70,10 +70,24 @@ class Rocket(arcade.AnimatedTimeSprite):
         self._health -= damage
 
     def get_health(self):
-        return self._health
+        if self._active == True:
+            return self._health
+        else:
+            return 0
+
+    def is_over(self):
+        if self._active == False:
+            return True
+        else:
+            return False
 
     def ready(self):
         self._ready = True
+
+    def _out_of_screen(self):
+        if self.top > 0:
+            return False
+        return True
 
     def _check_dead(self):
         if self._health <= 0:
@@ -485,6 +499,23 @@ class Component_list():
     def print_component(self):
         print(self._components)
 
+class ScoreFileRW():
+
+    def __init__(self,name):
+        self.file_name = name
+
+    def read(self):
+        with open( self.file_name , 'r') as file:
+            file = file.readlines()
+            score_list = [x.strip().split(',') for x in file if x != '']
+        for elem in score_list:
+            elem[1] = int(elem[1])
+        return score_list
+
+    def write(self, score_obj):
+        with open( self.file_name, 'a') as file:
+            file.write(f'{score_obj.name},{score_obj.score}\n')
+
 class World:
     STATE_FROZEN = 1
     STATE_STARTED = 2
@@ -498,6 +529,7 @@ class World:
         self._time = 0
         self._next_level_time = 10
         self._ready = False
+        self._gameover = False
 
         self._state = World.STATE_FROZEN
 
@@ -505,7 +537,7 @@ class World:
         self._cloud_amount = cloud_amount
         self._cloud_list = arcade.SpriteList()
         self._cloud_list.sprite_list = list(map(lambda x : Cloud(self._width, self._height), range(self._cloud_amount)))
-        self._components.add_component(self._cloud_list)
+        # self._components.add_component(self._cloud_list)
         self._type = None
 
     def add_rocket(self, rocket):
@@ -530,11 +562,11 @@ class World:
         self._state = World.STATE_FROZEN
 
     def check_start_pos(self):
-        if self._rocket.center_y >= self._height//2 and self.is_ready() == False:
-            self.ready()
+        if self._rocket.center_y >= self._height//2 and self._is_ready() == False:
+            self._world_ready()
             self._rocket.ready()
 
-    def ready(self):
+    def _world_ready(self):
         self._ready = True
         self._start_time = time.time()
 
@@ -542,20 +574,46 @@ class World:
         return self._state == World.STATE_STARTED
 
     def draw(self):
+        if self._is_over() == False:
+            self._cloud_list.draw()
         self._rocket.draw()
-        self._components.draw()
-        self._missile_manager.draw()
-        self.draw_stat()
+        if self._is_over() == False:
 
-    def draw_stat(self):
+            arcade.draw_rectangle_filled(self._width//2, 35, 305, 55, color=arcade.color.WHITE)
+            arcade.draw_rectangle_filled(self._width//2, 35/100*self._rocket.get_health(), 305, 55/100*self._rocket.get_health(), color=arcade.color.RED)
+            self._components.draw()
+            self._draw_stat()
+            self._missile_manager.draw()
+        if self._is_over() == True:
+            self._draw_gameover()
+
+    def _draw_gameover(self):
+        arcade.draw_rectangle_filled(self._width//2,self._height//2,self._width-250, self._height-150, color=arcade.color.DARK_GRAY)
+        self._draw_gameover_stat()
+
+    def _draw_gameover_stat(self):
+        arcade.draw_text(f'Result',
+                self._width//2 - 50, self._height//2 + 200,
+                arcade.color.BLACK, font_size=30)
+        arcade.draw_text(f'Total Words: {self._missile_count}',
+                self._width//2 - 200, self._height//2 + 80,
+                arcade.color.BLACK, font_size=30)
+        arcade.draw_text(f'Total Time: {self._time:.2f}',
+                self._width//2 - 200, self._height//2,
+                arcade.color.BLACK, font_size=30)
+        arcade.draw_text(f'Speed: {(self._missile_count/(self._time/60)):.2f} WPM',
+                self._width//2 - 200, self._height//2 - 80,
+                arcade.color.BLACK, font_size=30)
+
+    def _draw_stat(self):
         self._draw_rocket_health()
         self._draw_missile_count()
         self._draw_time()
 
     def _draw_rocket_health(self):
-        arcade.draw_text(str(self._rocket.get_health()),
-                self._width//2 - 25, 30,
-                arcade.color.BLACK, font_size=33)
+        arcade.draw_text('HEALTH',
+                self._width//2 - 50, 25,
+                arcade.color.BLACK, font_size=25)
 
     def _draw_missile_count(self):
         arcade.draw_text(str(f'Word: {self._missile_count}'),
@@ -573,20 +631,26 @@ class World:
         self._rocket.update()
         self._rocket.update_animation()
         self.check_start_pos()
-        self._components.update()
-        self._missile_manager.update(self._type)
-        self._type = 0
-        self._update_health()
-        self._update_missile_count()
-        if self.is_ready() == True:
+        if self._is_over() == False:
+            self._components.update()
+            self._cloud_list.update()
+            self._missile_manager.update(self._type)
+            self._type = 0
+        if self._is_ready() == True and self._is_over() == False:
+            self._update_health()
+            self._update_missile_count()
             self._update_time()
-        self._update_level()
+            self._update_level()
+        self._check_gameover()
+
+    def _check_gameover(self):
+        if self._rocket.is_over() == True:
+            self._gameover = True
 
     def _update_level(self):
         if self._time >= self._next_level_time:
             self._missile_manager.increase_level()
             self._next_level_time += 10
-            print('uo')
 
     def _update_time(self):
         self._time = time.time() - self._start_time
@@ -599,7 +663,10 @@ class World:
         self._rocket.update_health(self._missile_manager.get_damage())
         self._missile_manager.reset_damage()
 
-    def is_ready(self):
+    def _is_over(self):
+        return self._gameover
+
+    def _is_ready(self):
         return self._ready
 
     def on_key_press(self, key, key_modifiers):
