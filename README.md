@@ -8,7 +8,7 @@
 These resources are needed in order to run the program:
 
 - `Python (ver.3.6 or newer)` [download site](https://www.python.org/downloads/)
--  python arcade library
+- `Python arcade library (ver.2.9.8 or newer)` [download site](https://github.com/pvcraven/arcade)
 
 ## Installation
 
