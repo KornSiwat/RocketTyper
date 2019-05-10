@@ -148,7 +148,7 @@ class RocketTyperWindow(arcade.Window):
                 self._width//2 - 320, self._height//2 - 50,
                 arcade.color.BLACK, font_size=23)
 
-        arcade.draw_text(f'by typing the word to destroy an incoming missiles.',
+        arcade.draw_text(f'by typing the word to destroy incoming missiles.',
                 self._width//2 - 320, self._height//2 - 130,
                 arcade.color.BLACK, font_size=23)
 
@@ -175,11 +175,28 @@ class RocketTyperWindow(arcade.Window):
                 self._width//2 - 320, self._height//2 + 120,
                 arcade.color.BLACK, font_size=23)
         for no, score in enumerate(self.score_rw.get_latest_five(),1):
-            if len(str(score[1])) == 5:
-                dummy = ' '
+            if len(str(score[0])) == 5:
+                dummy1 = ' '
+            elif len(str(score[0])) == 4:
+                dummy1 = '  '
+            elif len(str(score[0])) == 3:
+                dummy1 = '   '
             else:
-                dummy = ''
-            arcade.draw_text(f'|   {no}    |    {score[0]:^5}   |  {score[2]:^26}  |  {score[1]:^10}{dummy}  |',
+                dummy1 = ''
+            if len(str(score[2])) == 5:
+                dummy2 = ' '
+            elif len(str(score[2])) == 4:
+                dummy2 = '  '
+            elif len(str(score[2])) == 3:
+                dummy2 = '   '
+            else:
+                dummy2 = ''
+            if len(str(score[1])) == 5:
+                dummy3 = '  '
+            else:
+                dummy3 = ''
+            # sorry for this trashy way of showing text
+            arcade.draw_text(f'|   {no}    |   {score[0]:<5}{dummy1}  |             {score[2]:<15}{dummy2} |     {score[1]:<6}{dummy3}   |',
                     self._width//2 - 320, self._height//2 + 120 - 30*no,
                     arcade.color.BLACK, font_size=23)
 
