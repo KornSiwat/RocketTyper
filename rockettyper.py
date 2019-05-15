@@ -78,6 +78,9 @@ class RocketTyperWindow(arcade.Window):
         self.choice_list.append(self.howToPlay)
         self.choice_list.append(self.scoreboard)
 
+        self.instruction = arcade.load_texture('images/instruction.png')
+        self.scoreboard_bg = arcade.load_texture('images/scoreboardbg.png')
+
     def game_setup(self, width, height):
         self.world = World(width, height)
 
@@ -135,6 +138,8 @@ class RocketTyperWindow(arcade.Window):
 
 
     def draw_menu(self):
+        self.howToPlay.center_y = self.height//2 - 160
+        self.scoreboard.center_y = self.height//2 - 230
         self.rocket_menu.draw()
         self.choice_list.draw()
             
@@ -142,80 +147,59 @@ class RocketTyperWindow(arcade.Window):
         self.world.draw()
 
     def draw_instruction(self):
-        arcade.draw_texture_rectangle(self.width//2 , self.height//2 ,self.width-250, self.height-150,self.gray_background)
-        arcade.draw_text(f'How To Play',
-                self._width//2 - 110, self._height//2 + 195,
-                arcade.color.BLACK, font_size=35)
-        arcade.draw_text(f'The Rocket has a mission to travel to the Moon.',
-                self._width//2 - 320, self._height//2 + 110,
-                arcade.color.BLACK, font_size=23)
-        arcade.draw_text(f'On its way, there\'re enemies that want to stop ',
-                self._width//2 - 320, self._height//2 + 30,
-                arcade.color.BLACK, font_size=23)
-        arcade.draw_text(f' the mission. Help the rocket complete its mission ',
-                self._width//2 - 320, self._height//2 - 50,
-                arcade.color.BLACK, font_size=23)
+        arcade.draw_texture_rectangle(self.width//2 , self.height//2 ,self.width-250, self.height-150, self.gray_background)
 
-        arcade.draw_text(f'by typing the word to destroy incoming missiles.',
-                self._width//2 - 320, self._height//2 - 130,
-                arcade.color.BLACK, font_size=23)
+        arcade.draw_texture_rectangle(self.width//2 , self.height//2 ,self.width-250, self.height-150 ,self.instruction)
 
-        arcade.draw_text('ESC To Menu',
-                self._width//2 - 320, self._height//2 - 210,
-                arcade.color.BLACK, font_size=15)
+        self.howToPlay.center_y = self.size_height//2 + 205
+        self.howToPlay.set_texture(0)
+        self.howToPlay.draw()
 
     def draw_scoreboard(self):
         arcade.draw_texture_rectangle(self.width//2 , self.height//2 ,self.width-250, self.height-150,self.gray_background)
-        arcade.draw_text(f'Scoreboard',
-                self._width//2 - 110, self._height//2 + 195,
-                arcade.color.BLACK, font_size=35)
+        arcade.draw_texture_rectangle(self.width//2 , self.height//2 ,self.width-250, self.height-150 ,self.scoreboard_bg)
 
-        arcade.draw_text('Recent Scores',
-                self._width//2 - 320, self._height//2 + 160,
-                arcade.color.BLACK, font_size=20)
+        self.scoreboard.center_y = self.size_height//2 + 205
+        self.scoreboard.set_texture(0)
+        self.scoreboard.draw()
 
-        arcade.draw_text('ESC To Menu',
-                self._width//2 - 320, self._height//2 - 210,
-                arcade.color.BLACK, font_size=15)
-
-
-        arcade.draw_text(f'|  No. |  Words  |  Word Per Minute  | Total Time |',
-                self._width//2 - 320, self._height//2 + 120,
+        arcade.draw_text('No.',
+                self._width//2 - 280, self._height//2 + 100,
+                arcade.color.BLACK, font_size=23)
+        arcade.draw_text('Words',
+                self._width//2 - 200, self._height//2 + 100,
+                arcade.color.BLACK, font_size=23)
+        arcade.draw_text('Word Per Minute',
+                self._width//2 - 75, self._height//2 + 100,
+                arcade.color.BLACK, font_size=23)
+        arcade.draw_text('Total Time',
+                self._width//2 + 170, self._height//2 + 100,
                 arcade.color.BLACK, font_size=23)
         for no, score in enumerate(self.score_rw.get_latest_five(),1):
-            if len(str(score[0])) == 5:
-                dummy1 = ' '
-            elif len(str(score[0])) == 4:
-                dummy1 = '  '
-            elif len(str(score[0])) == 3:
-                dummy1 = '   '
-            else:
-                dummy1 = ''
-            if len(str(score[2])) == 5:
-                dummy2 = ' '
-            elif len(str(score[2])) == 4:
-                dummy2 = '  '
-            elif len(str(score[2])) == 3:
-                dummy2 = '   '
-            else:
-                dummy2 = ''
-            if len(str(score[1])) == 5:
-                dummy3 = '  '
-            else:
-                dummy3 = ''
-            # sorry for this trashy way of showing text
-            arcade.draw_text(f'|   {no}    |   {score[0]:<5}{dummy1}  |             {score[2]:<15}{dummy2} |     {score[1]:<6}{dummy3}   |',
-                    self._width//2 - 320, self._height//2 + 120 - 30*no,
+
+            arcade.draw_text(f'{no}',
+                    self._width//2 - 270, self._height//2 + 90 - 30*no,
+                    arcade.color.BLACK, font_size=23)
+
+            arcade.draw_text(f'{score[0]:02.2f}',
+                    self._width//2 - 180, self._height//2 + 90 - 30*no,
+                    arcade.color.BLACK, font_size=23)
+
+            arcade.draw_text(f'{score[2]}',
+                    self._width//2 , self._height//2 + 90 - 30*no,
+                    arcade.color.BLACK, font_size=23)
+
+            arcade.draw_text(f'{score[1]}',
+                    self._width//2 + 200, self._height//2 + 90 - 30*no,
                     arcade.color.BLACK, font_size=23)
 
         arcade.draw_text(f'Local Best Time: {self.score_rw.get_best()[1]:.2f} s',
-                self._width//2 - 320, self._height//2 - 100,
+                self._width//2 - 320, self._height//2 - 120,
                 arcade.color.BLACK, font_size=23)
 
         arcade.draw_text(f'World Best Time: Feature Coming Soon',
-                self._width//2 - 320, self._height//2 - 140,
+                self._width//2 - 320, self._height//2 - 160,
                 arcade.color.BLACK, font_size=23)
-
 
     def update_selected_choice(self):
         for choice in self.choice_list:
