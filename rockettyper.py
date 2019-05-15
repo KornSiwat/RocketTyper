@@ -34,6 +34,9 @@ class RocketTyperWindow(arcade.Window):
         self.menu_setup()
         self.game_setup(width,height)
 
+        self.fpscounter = Fpscounter()
+        self.set_update_rate(1/60)
+
     def menu_setup(self):
         self.choice_list = arcade.SpriteList()
 
@@ -125,6 +128,11 @@ class RocketTyperWindow(arcade.Window):
             self.draw_instruction()
         elif self.current_route == routes['scoreboard']:
             self.draw_scoreboard()
+
+        self.fpscounter.tick()
+        fps = f"fps{self.fpscounter.fps():.2f}"
+        arcade.draw_text(fps, 6,self.size_height - 18,arcade.color.BLACK)
+
 
     def draw_menu(self):
         self.rocket_menu.draw()
@@ -246,6 +254,27 @@ class RocketTyperWindow(arcade.Window):
         elif self.current_route == routes['scoreboard']:
             if key == arcade.key.ESCAPE:
                 self.current_route = routes['menu']
+
+class Fpscounter:
+    def __init__(self):
+        import time
+        import collections
+        self.time = time.perf_counter
+        self.frametime = collections.deque(maxlen=60)
+        self.t = self.time()
+
+    def tick(self):
+        t = self.time()
+        dt = t-self.t 
+        self.frametime.append(dt)
+        self.t = t   
+
+    def fps(self):
+        try:
+            return 60/sum(self.frametime)
+        except ZeroDivisionError:
+            return 0
+
 
 if __name__ == '__main__':
     window = RocketTyperWindow(SCREEN_WIDTH, SCREEN_HEIGHT)
