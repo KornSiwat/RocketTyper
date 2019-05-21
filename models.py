@@ -160,14 +160,20 @@ class Missile(arcade.Sprite):
         return self._selected
 
     def explode(self):
+        ''' change the missile status to indicate that it is needed to be destroyed '''
+
         self._active = False
         self._selected = False
 
     def draw_with_word(self):
+        ''' draw the missile sprite and the word attached to it '''
+
         self.draw()
         self._word.draw()
 
     def update_pos(self):
+        ''' update the missile position '''
+
         if self.left >= self._target:
             self.center_x -= self._speed
             self._word.update_pos(self.center_x + self._distance)
@@ -176,9 +182,13 @@ class Missile(arcade.Sprite):
             self.explode()
 
     def update_key(self, key):
+        ''' pass in the pressed key to the word update function of word instance '''
+
         self._word.update_key(key)
 
     def check_word(self):
+        ''' check if the word attached to the missile has been typed and also if it is completed '''
+
         if self._word.is_selected() == True:
             self._selected = True
         if self._word.is_completed() == True:
@@ -186,18 +196,28 @@ class Missile(arcade.Sprite):
             self.explode()
 
     def is_active(self):
+        ''' check and return if the missile is active or not '''
+
         return self._active
 
     def get_damage(self):
+        ''' return the damage of the missile '''
+
         if self._hit == True:
             return self._damage
         return 0
 
     def get_first_alphabet(self):
+        ''' return the first alphabet of the word attached to the missile '''
+
         return self._first_alphabet
 
 class Word():
+    ''' class for the word attached to the back of the missile '''
+
     def __init__(self,x ,y, word):
+        ''' create the attributes of the instance '''
+
         self._x = x
         self._y = y
         self._word = word
@@ -207,6 +227,8 @@ class Word():
         self._selected = False
 
     def draw(self):
+        ''' draw the word on the screen with different color for the typed character and the untyped '''
+
         white_text = self._word
         red_text = ''
         for char in self._char_list:
@@ -218,9 +240,13 @@ class Word():
         arcade.draw_text(red_text, self._x, self._y, color=arcade.color.RED, font_size=16)
 
     def update_pos(self, new_x):
+        ''' update the posion of the text to be drawn '''
+
         self._x = new_x
 
     def update_key(self, key):
+        ''' check if the active character matched with the key parameter by using check_key function and also check if the word is completed '''
+
         for char in self._char_list:
             if char.is_active() == True:
                 self._current_char = char
@@ -230,41 +256,67 @@ class Word():
         self._check_key(key)
 
     def _check_key(self, key):
+        ''' convert the first untyped character of the word from string to unicode to compare with the value from key parameter
+        and call is_typed function of that character instance if the value matched the change the status of word selected to True
+        '''
+
         if key == ord(self._current_char.get_char()):
             self._current_char.is_typed()
             self._selected = True
 
     def is_selected(self):
+        ''' return the status whether the word is being typing or not '''
+
         return self._selected
 
     def is_completed(self):
+        ''' return the status whether all the character of the word has been typed or not '''
+
         return self._completed
 
     def get_current_char(self):
+        ''' return the character instance that is waiting to be typed '''
+
         return self._current_char
 
     def print_word(self):
+        ''' show the word in the command line '''
+
         for char in self._char_list:
             print(char)
 
 class Char():
+    ''' class for character of the word attached to the missile '''
+
     def __init__(self,char):
+        ''' create the attributes of the Char instance '''
+
         self._char = char
         self._active = True    
 
     def is_typed(self):
+        ''' call when the value of the character matched with the input key to change the active status of the instance '''
+
         self._active = False
 
     def is_active(self):
+        ''' return whethe the char instance has been typed or not '''
+
         return self._active
 
     def get_char(self):
+        ''' return the string value from the char attribute of the instance '''
+
         return self._char
 
     def __str__(self):
+        ''' return the string of char attribute of the instance when the instance is called by print funcition '''
+
         return self._char
 
 class MissileManager():
+    ''' class for the missile manager of the game which is responsible the for the missile deployment, missile destroy '''
+
     def __init__(self, width, height, target=0, level=1, missile_height=100):
         self._target = target
         self._attack_zone_x = [target, width]
