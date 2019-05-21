@@ -6,21 +6,28 @@ import string
 SPEED = 7
 
 class MenuChoiceSprite(arcade.AnimatedTimeSprite):
+    ''' class for the menu choice sprite'''
+
     def __init__(self, *args, **kwargs):
         self._selected = False
 
         super().__init__(*args, **kwargs)
 
     def select(self):
+        ''' call when the choice is chosen '''
         self._selected = True
 
     def unselect(self):
+        ''' call when the choice is not chosen'''
         self._selected = False
 
     def is_selected(self):
+        ''' return the status whether the instance is being selected or not '''
         return self._selected
 
 class Cloud(arcade.Sprite):
+    ''' class for cloud element'''
+
     INSTANCE_NUMBER = 0
 
     def __init__(self, width, height, *args, **kwargs):
@@ -34,22 +41,31 @@ class Cloud(arcade.Sprite):
         Cloud.INSTANCE_NUMBER += 1
 
     def update(self):
+        ''' update the position of the cloud instance '''
+
         self.center_y -= self._speed
         if self.out_of_screen():
             self._reuse()
 
     def out_of_screen(self):
+        ''' check the position of the cloud instance and return True if the cloud is out of the screen '''
+
         if self.center_y + self.top < 0:
             return True
         return False
 
     def _reuse(self):
+        ''' call when the cloud instance is out of the screen to random the x position of the cloud and release it from the top of the screen '''
+
         self.center_x = randint(100, self._screen_width)
         self.center_y = self._screen_height + 300
 
 class Rocket(arcade.AnimatedTimeSprite):
+    ''' class for Rocket Sprite '''
 
     def __init__(self, x, y, *args, **kwargs):
+        ''' create the attributes of the rocket '''
+
         super().__init__(*args, **kwargs)
         self.center_x = x
         self.center_y = y
@@ -59,6 +75,8 @@ class Rocket(arcade.AnimatedTimeSprite):
         self._active = True
 
     def update(self):
+        ''' update the texture of the rocket and check the position and move it based on the current status '''
+
         self.update_animation()
         if self._ready == False:
             self._move_up()
@@ -67,40 +85,60 @@ class Rocket(arcade.AnimatedTimeSprite):
         self._check_dead()
 
     def update_health(self, damage):
+        ''' subtract the current health of the rocket with the damage parameter '''
+
         self._health -= damage
 
     def get_health(self):
+        ''' return the current health of the rocket '''
+
         if self._active == True:
             return self._health
         else:
             return 0
 
     def is_over(self):
+        ''' return the status of the rocket '''
+
         if self._active == False:
             return True
         else:
             return False
 
     def ready(self):
+        ''' call when the rocket is at its ready position '''
+
         self._ready = True
 
     def _out_of_screen(self):
+        ''' check the position of the rocket and returns true if it is in the screen else returns false '''
+
         if self.top > 0:
             return False
         return True
 
     def _check_dead(self):
+        ''' check and update the active status of the rocket based on its health '''
+
         if self._health <= 0:
             self._active = False
 
     def _move_up(self):
+        ''' move the rocket in upward direction '''
+
         self.center_y += self._speed
 
     def _move_down(self):
+        ''' move the rocket in downward direction '''
+
         self.center_y -= self._speed
 
 class Missile(arcade.Sprite):
+    ''' class for Missile Sprite '''
+
     def __init__(self, x, y, word='',target=0, damage=10, speed=1, *args, **kwargs):
+        ''' create the attributes of the missile '''
+
         super().__init__(*args, **kwargs)
         self.append_texture(arcade.load_texture('images/missile.png'))
         self.set_texture(0)
@@ -117,6 +155,8 @@ class Missile(arcade.Sprite):
         self._speed = speed
 
     def is_selected(self):
+        ''' return the status whether the missile is being typed '''
+
         return self._selected
 
     def explode(self):

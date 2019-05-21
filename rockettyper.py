@@ -19,7 +19,11 @@ choices = {
 }
 
 class RocketTyperWindow(arcade.Window):
+    ''' Class for game window '''
+
     def __init__(self, width, height):
+        ''' create important attribute for the game '''
+
         super().__init__(width, height)
         self.size_width = width
         self.size_height = height
@@ -38,6 +42,8 @@ class RocketTyperWindow(arcade.Window):
         self.set_update_rate(1/60)
 
     def menu_setup(self):
+        ''' create menu route element '''
+
         self.choice_list = arcade.SpriteList()
 
         self.rocket_menu = MenuChoiceSprite()
@@ -82,6 +88,8 @@ class RocketTyperWindow(arcade.Window):
         self.scoreboard_bg = arcade.load_texture('images/scoreboardbg.png')
 
     def game_setup(self, width, height):
+        ''' create gameplay route element '''
+
         self.world = World(width, height)
 
         self.cockpit = arcade.Sprite()
@@ -108,6 +116,8 @@ class RocketTyperWindow(arcade.Window):
         self.world.add_score_rw(self.score_rw)
 
     def update(self, delta):
+        ''' update the value based on current route '''
+
         if self.current_route == routes['menu']:
             self.rocket_menu.update()
             self.rocket_menu.update_animation()
@@ -119,6 +129,7 @@ class RocketTyperWindow(arcade.Window):
             self.world.update(delta)
 
     def on_draw(self):
+        ''' render element based on route '''
 
         arcade.start_render()
         arcade.draw_texture_rectangle(self.width//2 , self.height//2 ,self.width, self.height,self.background)
@@ -138,15 +149,21 @@ class RocketTyperWindow(arcade.Window):
 
 
     def draw_menu(self):
+        ''' draw menu route element '''
+
         self.howToPlay.center_y = self.height//2 - 160
         self.scoreboard.center_y = self.height//2 - 230
         self.rocket_menu.draw()
         self.choice_list.draw()
             
     def draw_game(self):
+        ''' draw gameplat route element '''
+
         self.world.draw()
 
     def draw_instruction(self):
+        ''' draw instruction route element '''
+
         arcade.draw_texture_rectangle(self.width//2 , self.height//2 ,self.width-250, self.height-150, self.gray_background)
 
         arcade.draw_texture_rectangle(self.width//2 , self.height//2 ,self.width-250, self.height-150 ,self.instruction)
@@ -156,6 +173,8 @@ class RocketTyperWindow(arcade.Window):
         self.howToPlay.draw()
 
     def draw_scoreboard(self):
+        ''' draw scoreboard route element '''
+
         arcade.draw_texture_rectangle(self.width//2 , self.height//2 ,self.width-250, self.height-150,self.gray_background)
         arcade.draw_texture_rectangle(self.width//2 , self.height//2 ,self.width-250, self.height-150 ,self.scoreboard_bg)
 
@@ -202,12 +221,16 @@ class RocketTyperWindow(arcade.Window):
                 arcade.color.BLACK, font_size=23)
 
     def update_selected_choice(self):
+        ''' check the selecting menu choice and update the value to current route '''
+
         for choice in self.choice_list:
             choice.unselect()
             choice.set_texture(1)
         self.choice_list[self.selecting_choice].select()
 
     def on_key_press(self, key, key_modifiers):
+        ''' passing the press key value to elements based on current route '''
+
         if self.current_route == routes['menu']:
             if key == arcade.key.DOWN:
                 if self.selecting_choice < 2:
@@ -240,6 +263,8 @@ class RocketTyperWindow(arcade.Window):
                 self.current_route = routes['menu']
 
 class Fpscounter:
+    ''' class for the fps counting '''
+
     def __init__(self):
         import time
         import collections
@@ -248,12 +273,16 @@ class Fpscounter:
         self.t = self.time()
 
     def tick(self):
+        ''' count the frame when draw '''
+
         t = self.time()
         dt = t-self.t 
         self.frametime.append(dt)
         self.t = t   
 
     def fps(self):
+        ''' return the current fps '''
+
         try:
             return 60/sum(self.frametime)
         except ZeroDivisionError:
