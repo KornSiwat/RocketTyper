@@ -489,11 +489,26 @@ class MissileManager():
                 if slot.get_level() != self._level:
                     slot._increase_missile_speed()
                     slot.set_level(self._level)
+        elif self._level == 11:
+            for slot in self._slot_list:
+                if slot.get_level() != self._level:
+                    slot._increase_missile_speed()
+                    slot.set_level(self._level)
+        elif self._level == 13:
+            for slot in self._slot_list:
+                if slot.get_level() != self._level:
+                    slot._increase_missile_speed()
+                    slot.set_level(self._level)
+        elif self._level == 15:
+            for slot in self._slot_list:
+                if slot.get_level() != self._level:
+                    slot._increase_missile_speed()
+                    slot.set_level(self._level)
 
     def increase_level(self):
         ''' increase the value of the level attribute by one if its value is less than ten '''
 
-        if self._level < 10:
+        if self._level < 15:
             self._level += 1
 
 class Slot():
