@@ -1,5 +1,4 @@
 import arcade
-# from dummy import World, Rocket, Missile, ScoreFileManager
 from models.MenuChoiceSprite import MenuChoiceSprite
 from models.World import World
 from models.Rocket import Rocket
