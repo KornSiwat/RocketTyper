@@ -464,52 +464,32 @@ class MissileManager():
         The game will be more difficult as the level attribute incrases.
         '''
 
-        if self._level == 2:
-            self._wait_time = 2
-            self._deploy_amount = 2
-        elif self._level == 3:
-            self._deploy_amount = 3
-        elif self._level == 4:
-            self._deploy_amount = 4
-            for slot in self._slot_list:
-                if slot.get_level() != self._level:
-                    slot._increase_missile_speed()
-                    slot.set_level(self._level)
-            self._word_manager.set_level(2)
-        elif self._level == 5:
-            self._deploy_amount = 5
-            self._word_manager.set_level(3)
-        elif self._level == 7:
-            self._deploy_amount = 5
-            self._word_manager.set_level(4)
-        elif self._level == 8:
-            self._deploy_amount = 5
-            self._word_manager.set_level(5)
-            for slot in self._slot_list:
-                if slot.get_level() != self._level:
-                    slot._increase_missile_speed()
-                    slot.set_level(self._level)
-        elif self._level == 11:
-            for slot in self._slot_list:
-                if slot.get_level() != self._level:
-                    slot._increase_missile_speed()
-                    slot.set_level(self._level)
-        elif self._level == 13:
-            for slot in self._slot_list:
-                if slot.get_level() != self._level:
-                    slot._increase_missile_speed()
-                    slot.set_level(self._level)
-        elif self._level == 15:
-            for slot in self._slot_list:
-                if slot.get_level() != self._level:
-                    slot._increase_missile_speed()
-                    slot.set_level(self._level)
+        if self._level % 2 == 0 and self._level < 5:
+            self.change_difficulty(wait_time=2, deploy_amount=2)
+        elif self._level > 5 and self._level % 2 == 1:
+            self.change_difficulty(wait_time=2, deploy_amount=4, increase_speed=True)
+
+    def change_difficulty(self, wait_time=self.wait_time, deploy_amount=self.deploy_amount, increase_speed=False):
+        if self._updated_level == False:
+            self._word_manager.set_level(self._level//2)
+            self._wait_time = wait_time
+            self._deploy_amount = deploy_amount
+            if increase_speed == True:
+                self.increase_missile_speed()
+            self._updated_level = True
+
+    def increase_missile_speed(self):
+        for slot in self._slot_list:
+            if slot.get_level() != self._level:
+                slot._increase_missile_speed()
+                slot.set_level(self._level)
 
     def increase_level(self):
         ''' increase the value of the level attribute by one if its value is less than ten '''
 
         if self._level < 15:
             self._level += 1
+            self._updated_level = False
 
 class Slot():
     ''' class for slots in the missile manager which each instance has its own y position and responsible for missile in the x range of position '''
