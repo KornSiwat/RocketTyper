@@ -1,4 +1,4 @@
-class Fpscounter:
+class FpsCounter:
     ''' class for the fps counting '''
 
     def __init__(self):

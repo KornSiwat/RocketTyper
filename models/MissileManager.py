@@ -7,18 +7,16 @@ from random import choice
 class MissileManager():
     ''' class for the missile manager of the game which is responsible the for the missile deployment, missile destroy '''
 
-    def __init__(self, width, height, target=0, level=0, missile_height=100, hard_level=6):
-        ''' create the attributes for the missile manager instance '''
-
-        self._target = target
-        self._attack_zone_x = [target, width]
+    def __init__(self, width, height, missileTargetPosition, wordFileName, level=0, missile_height=100, hard_level=6):
+        self.missileTargetPosition = missileTargetPosition
+        self._attack_zone_x = [missileTargetPosition, width]
         self._attack_zone_y = [150, height]
         self._level = level
         self._hard_level = hard_level
         self._updated_level = False
         self._slot_list = []
         for y_pos in range(self._attack_zone_y[1],200, -(missile_height)):
-            self._slot_list.append(Slot(self._attack_zone_x, y_pos-50, self._target))
+            self._slot_list.append(Slot(self._attack_zone_x, y_pos-50, self.missileTargetPosition))
         self._wait_time = 3
         self._deploy_amount = 1
         self._current_slot = None
@@ -26,7 +24,7 @@ class MissileManager():
         self._missile_count = 0
         self._timer = time.time()
 
-    def add_word_manager(self, path):
+    def setup_manager(self, path):
         ''' use the path parameter to create the word manager instance then assign it to the word_manager attribute of the instance '''
 
         self._word_manager = WordManager(ReadWordFile(path).get_list())
@@ -34,13 +32,10 @@ class MissileManager():
             slot.add_word_manager(self._word_manager)
     
     def draw(self):
-        ''' call draw method of each slots '''
-
         for slot in self._slot_list:
             slot.draw()
 
     def update(self, key):
-        ''' call methods to update value and status of attributes '''
 
         self._check_deploy_time()
         self._update_pos()
@@ -50,17 +45,10 @@ class MissileManager():
         self._update_level()
 
     def _update_pos(self):
-        ''' call an update posiotion funcition of slot that has a missile '''
-
         for slot in self._get_used_slot():
             slot.update_pos()
 
     def _key_handle(self,key):
-        ''' check whether there is any selecting missile. 
-        if there exist a selected slot, the key parameter will be passed to the update_key function of the selected slot
-        else the key will be pass to slots to check it is matched with any of the slot in order to assign new slot to the current_slot attribute (selected slot)
-        '''
-
         if self._current_slot == None or self._current_slot.is_selected() == False:
             for slot in self._get_used_slot():
                 slot.update_key(key)
