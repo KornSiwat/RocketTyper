@@ -11,11 +11,15 @@ class PlayingScene():
 		self.height = height
 		self.world = World(width=width, height=height, gameRestart=self.gameRestart)
 
+	def draw(self):
+		self.world.draw()
+
 	def update(self):
+		self.world.start()
 		self.world.update()
 
 	def on_key_press(self, key):
 		self.world.on_key_press(key)
 
 	def gameRestart(self):
-		self.world = World(width=width, height=height, gameRestart=self.gameRestart)
+		self.world = World(width=self.width, height=self.height, gameRestart=self.gameRestart)

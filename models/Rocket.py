@@ -1,8 +1,11 @@
 import arcade
 
 class Rocket(arcade.AnimatedTimeSprite):
-    def __init__(self, x, y, speed=7, *args, **kwargs):
+    def __init__(self, width, height, x, y, speed=7, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.screen_width = width
+        self.screen_height = height
+
         self.center_x = x
         self.center_y = y
 
@@ -15,10 +18,10 @@ class Rocket(arcade.AnimatedTimeSprite):
         self.update_animation()
 
         if not self.at_ready_position():
-            self._move_up()
+            self.move_up()
 
-        if self.is_over() and not self.is_out_of_screen():
-            self._move_down()
+        if self.is_destroyed() and not self.is_out_of_screen():
+            self.move_down()
 
         self.check_health()
 
@@ -26,9 +29,9 @@ class Rocket(arcade.AnimatedTimeSprite):
         self.health -= 10
 
     def at_ready_position(self):
-        middle_of_screen = self.height//2
-        at_middle_of_screen = self.rocket.center_y >= middle_of_screen
-        return middle_of_screen
+        middle_of_screen = self.screen_height//2
+        at_middle_of_screen = self.center_y >= middle_of_screen
+        return at_middle_of_screen
 
     def is_out_of_screen(self):
         return self.top < 0

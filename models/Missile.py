@@ -50,8 +50,6 @@ class Missile(arcade.Sprite):
             self.explode()
 
     def update_key(self, key):
-        ''' pass in the pressed key to the word update function of word instance '''
-
         self._word.update_key(key)
 
     def check_word(self):
@@ -64,18 +62,7 @@ class Missile(arcade.Sprite):
             self.explode()
 
     def is_active(self):
-        ''' check and return if the missile is active or not '''
-
         return self._active
 
-    def get_damage(self):
-        ''' return the damage of the missile '''
-
-        if self._hit == True:
-            return self._damage
-        return 0
-
     def get_first_alphabet(self):
-        ''' return the first alphabet of the word attached to the missile '''
-
         return self._first_alphabet

@@ -1,10 +1,15 @@
 import arcade
+from .Rocket import Rocket
 from .Cloud import Cloud
 from .ComponentList import ComponentList
 from .MissileManager import MissileManager
 from .MatchStat import MatchStat
 from .ScoreFileManager import ScoreFileManager
 import time
+
+import sys
+sys.path.append('..')
+from scenes.MatchStatScene import MatchStatScene
 
 class World():
 
@@ -18,34 +23,44 @@ class World():
 
         self._state = World.STATE_FROZEN
 
-        self._missile_count = 0
-        self._time = 0
+        self.destroyedMissileAmount = 0
+        self.playTime = 0
 
-        self.componentList = ComponentList()
+        self.setup_rocket()
+        self.setup_missile_manager(fileName='word/word.txt')
+        self.setup_components()
+        self.setup_cloud()
+
+        self.config_rocket()
+        self.config_component()
+        self.config_cloud()
+
+        self.gameReady = False
+        self.gameover = False
+
+        self.pressing_key = 0
+        self.next_level_time = 10
 
         self.gameRestart = gameRestart
 
-    def setup_rocket(self, rocket):
+    def setup_rocket(self):
         scale = 1.3
-        self.rocket = rocket(x=110, y=-120)
-        self.rocket.load_texture(arcade.load_texture('images/rocket6.png',scale=scale))
-        self.rocket.load_texture(arcade.load_texture('images/rocket5.png',scale=scale))
-        self.rocket.load_texture(arcade.load_texture('images/rocket4.png',scale=scale))
-        self.rocket.load_texture(arcade.load_texture('images/rocket3.png',scale=scale))
-        self.rocket.load_texture(arcade.load_texture('images/rocket2.png',scale=scale))
-        self.rocket.load_texture(arcade.load_texture('images/rocket1.png',scale=scale))
-        self.rocket.load_texture(arcade.load_texture('images/rocket.png',scale=scale))
+        self.rocket = Rocket(width=self.width, height=self.height, x=110, y=-120)
+        self.rocket.append_texture(arcade.load_texture('images/rocket6.png',scale=scale))
+        self.rocket.append_texture(arcade.load_texture('images/rocket5.png',scale=scale))
+        self.rocket.append_texture(arcade.load_texture('images/rocket4.png',scale=scale))
+        self.rocket.append_texture(arcade.load_texture('images/rocket3.png',scale=scale))
+        self.rocket.append_texture(arcade.load_texture('images/rocket2.png',scale=scale))
+        self.rocket.append_texture(arcade.load_texture('images/rocket1.png',scale=scale))
+        self.rocket.append_texture(arcade.load_texture('images/rocket.png',scale=scale))
 
-    def setup_missileManager(self, fileName):
-        rocket_body_position = self.rocket.right-50
-        self._missile_manager = MissileManager(self.width, self.height, missileTargetPosition=rocket_body_position, wordFileName=fileName)
-
-    def setup_scoreManager(self):
-        self._scoreManager = ScoreFileManager('../score.txt')
+    def setup_missile_manager(self, fileName):
+        rocket_body_position = self.rocket.right
+        self.missile_manager = MissileManager(self.width, self.height, missileTargetPosition=rocket_body_position, wordFileName=fileName, on_missile_destroy=self.on_missile_destroy, on_missile_hit=self.on_missile_hit)
 
     def setup_components(self):
+        self.componentList = ComponentList()
         self.cockpit = arcade.Sprite('images/cockpit.png')
-        # self.cockpit.load_texture(arcade.load_texture())
 
     def setup_cloud(self):
         cloudAmount = 5
@@ -53,7 +68,7 @@ class World():
         self.cloud_list.sprite_list = list(map(lambda x : Cloud(self.width, self.height), range(cloudAmount)))
 
     def config_rocket(self):
-        self.rocket.set_texture(8)
+        self.rocket.set_texture(6)
         self.rocket.texture_change_frame = 8
 
     def config_component(self):
@@ -70,8 +85,8 @@ class World():
         self.componentList.add_component(component)
 
     def add_cloud_texture(self, texture):
-        for cloud in self._cloud_list:
-            cloud.load_texture(arcade.load_texture(texture))
+        for cloud in self.cloud_list:
+            cloud.append_texture(arcade.load_texture(texture))
             cloud.set_texture(0)
 
     def start(self):
@@ -81,70 +96,81 @@ class World():
         self.state = World.STATE_FROZEN
 
     def start_game_timer(self):
-        self._start_time = time.time()
+        self.startTime = time.time()
 
     def is_started(self):
-        return self._state == World.STATE_STARTED
+        return self.state == World.STATE_STARTED
 
     def draw(self):
 
-        self.componentList.draw()
-        self.draw_stat()
-        self.rocket.draw()
-        self._missile_manager.draw()
         self.cloud_list.draw()
+        self.rocket.draw()
+        self.missile_manager.draw()
+        self.componentList.draw()
+        self.draw_stat_bar()
 
     def draw_stat_bar(self):
         arcade.draw_text('RocketTyper', 100, 25, arcade.color.BLACK, font_size=25)
-        self._draw_rocket_health()
-        self._draw_missile_count()
-        self._draw_time()
+        self.draw_health_bar()
+        self.draw_missile_count()
+        self.draw_time()
 
     def draw_health_bar(self):
-        arcade.draw_rectangle_filled(self._width//2, 35, 305, 55, color=arcade.color.WHITE)
-        arcade.draw_rectangle_filled(self._width//2, 35/100*self._rocket.get_health(), 305, 60/100*self._rocket.get_health(), color=arcade.color.ORANGE_RED)
-        arcade.draw_text('HEALTH', self._width//2 - 50, 25, arcade.color.BLACK, font_size=25)
+        arcade.draw_rectangle_filled(self.width//2, 35, 305, 55, color=arcade.color.WHITE)
+        arcade.draw_rectangle_filled(self.width//2, 35/100 * self.rocket.health, 305, 60 / 100 * self.rocket.health, color=arcade.color.ORANGE_RED)
+        arcade.draw_text('HEALTH', self.width//2 - 50, 25, arcade.color.BLACK, font_size=25)
 
-    def _draw_missile_count(self):
-        arcade.draw_text(str(f'Word: {self._missile_count}'), self._width//2 + 175, 25, arcade.color.BLACK, font_size=22)
+    def draw_missile_count(self):
+        arcade.draw_text(str(f'Word: {self.destroyedMissileAmount}'), self.width//2 + 175, 25, arcade.color.BLACK, font_size=22)
 
-    def _draw_time(self):
-        arcade.draw_text(str(f'Time: {self._time:.2f} s'), self._width//2 + 300, 25, arcade.color.BLACK, font_size=22)
+    def draw_time(self):
+        arcade.draw_text(str(f'Time: {self.playTime:.2f} s'), self.width//2 + 300, 25, arcade.color.BLACK, font_size=22)
 
     def update(self):
 
-        if self._state == World.STATE_FROZEN:
+        if self.state == World.STATE_FROZEN:
             return
-        self._rocket.update()
-        self._rocket.update_animation()
-        self.check_rocket_in_ready_position()
-        if self._is_over() == False:
-            self._components.update()
-            self._cloud_list.update()
-            self._update_time()
-            self._update_level()
-        self._check_gameover()
 
+        self.rocket.update()
+        self.rocket.update_animation()
+
+        if self.ready_to_draw():
+            self.componentList.update()
+            self.cloud_list.update()
+            self.update_play_time()
+            self.update_level()
+            self.missile_manager.update(self.pressing_key)
+        else:
+            self.check_game_ready()
 
     def update_level(self):
-        if self._time >= self._next_level_time:
-            self._missile_manager.increase_level()
-            self._next_level_time += 10
+        level_up_time = 10
+        if self.playTime >= level_up_time:
+            self.missile_manager.increase_level()
+            self.next_level_time += 10
 
     def update_play_time(self):
-        self.playTime = time.time() - self._startTime
+        self.playTime = time.time() - self.startTime
 
     def on_missile_destroy(self):
-        self.destroyed_missile_counter += self._missile_manager.get_missile_count()
+        self.destroyedMissileAmount += 1
 
-    def on_hit_by_missile(self):
-        self.rocket.hitByMissile()
+    def on_missile_hit(self):
+        self.rocket.hit_by_missile()
 
-    def gameover(self):
-        self.gameover = True
+    def on_gameover(self):
+        self.matchStatScene = MatchStatScene(self.width, self.height, self.destroyedMissileAmount, self.playTime)
+
+    def check_game_ready(self):
+        if self.rocket.at_ready_position():
+            self.gameReady = True
+            self.start_game_timer()
 
     def is_over(self):
         return self.gameover
 
+    def ready_to_draw(self):
+        return self.gameReady
+
     def on_key_press(self, key):
-        self._pressing_key = key
+        self.pressing_key = key
