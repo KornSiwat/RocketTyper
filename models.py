@@ -320,13 +320,15 @@ class Char():
 class MissileManager():
     ''' class for the missile manager of the game which is responsible the for the missile deployment, missile destroy '''
 
-    def __init__(self, width, height, target=0, level=1, missile_height=100):
+    def __init__(self, width, height, target=0, level=0, missile_height=100, hard_level=6):
         ''' create the attributes for the missile manager instance '''
 
         self._target = target
         self._attack_zone_x = [target, width]
         self._attack_zone_y = [150, height]
         self._level = level
+        self._hard_level = hard_level
+        self._updated_level = False
         self._slot_list = []
         for y_pos in range(self._attack_zone_y[1],200, -(missile_height)):
             self._slot_list.append(Slot(self._attack_zone_x, y_pos-50, self._target))
@@ -464,17 +466,27 @@ class MissileManager():
         The game will be more difficult as the level attribute incrases.
         '''
 
-        if self._level % 2 == 0 and self._level < 5:
-            self.change_difficulty(wait_time=2, deploy_amount=2)
-        elif self._level > 5 and self._level % 2 == 1:
-            self.change_difficulty(wait_time=2, deploy_amount=4, increase_speed=True)
+        if not self._reach_hard_level() and not self._level_is_odd():
+            self._change_difficulty(deploy_amount=2)
+        elif self._reach_hard_level() and self._level_is_odd():
+            self._change_difficulty(deploy_amount=4, increase_speed=True)
 
-    def change_difficulty(self, wait_time=self.wait_time, deploy_amount=self.deploy_amount, increase_speed=False):
+    def _reach_hard_level(self):
+        if self._level == self._hard_level:
+            return True
+        return False
+
+    def _level_is_odd(self):
+        if self._level % 2 == 1:
+            return True
+        return False
+
+    def _change_difficulty(self,wait_time=2, deploy_amount=2, increase_speed=False):
         if self._updated_level == False:
             self._word_manager.set_level(self._level//2)
             self._wait_time = wait_time
             self._deploy_amount = deploy_amount
-            if increase_speed == True:
+            if increase_speed:
                 self.increase_missile_speed()
             self._updated_level = True
 
