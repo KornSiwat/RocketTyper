@@ -1,5 +1,11 @@
 import arcade
-from models import World, Rocket, MenuChoiceSprite, Missile,ScoreFileRW
+# from dummy import World, Rocket, Missile, ScoreFileManager
+from models.MenuChoiceSprite import MenuChoiceSprite
+from models.World import World
+from models.Rocket import Rocket
+from models.Missile import Missile
+from models.ScoreFileManager import ScoreFileManager
+
 import time
 
 SCREEN_WIDTH = 1000
@@ -33,7 +39,7 @@ class RocketTyperWindow(arcade.Window):
 
         self.background = arcade.load_texture("images/background.png")
         self.gray_background = arcade.load_texture("images/result.png")
-        self.score_rw = ScoreFileRW('score.txt')
+        self.score_rw = ScoreFileManager('score.txt')
         self.score_rw.read()
         self.menu_setup()
         self.game_setup(width,height)
@@ -113,7 +119,7 @@ class RocketTyperWindow(arcade.Window):
 
         self.world.add_missile_manager('word/word.txt')
         self.world.add_cloud_texture('images/cloud.png')
-        self.world.add_score_rw(self.score_rw)
+        self.world.add_scoreManager(self.score_rw)
 
     def update(self, delta):
         ''' update the value based on current route '''
