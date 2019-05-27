@@ -5,7 +5,6 @@ from .MissileManager import MissileManager
 import time
 
 class World():
-    ''' class for world which is responsible for everything in each match of the game '''
 
     STATE_FROZEN = 1
     STATE_STARTED = 2
@@ -132,33 +131,17 @@ class World():
     def _draw_gameover_stat(self):
         ''' draw the statistics of the match '''
 
-        arcade.draw_text(f'Result',
-                self._width//2 - 50, self._height//2 + 195,
-                arcade.color.BLACK, font_size=35)
-        arcade.draw_text(f'Total Words: {self._missile_count}',
-                self._width//2 - 230, self._height//2 + 110,
-                arcade.color.BLACK, font_size=30)
-        arcade.draw_text(f'Total Time: {self._time:.2f}',
-                self._width//2 - 230, self._height//2 + 30,
-                arcade.color.BLACK, font_size=30)
-        arcade.draw_text(f'Speed: {(self._missile_count/(self._time/60)):.2f} WPM',
-                self._width//2 - 230, self._height//2 - 50,
-                arcade.color.BLACK, font_size=30)
-
-        arcade.draw_text(f'Local Best Time: {self._score_rw.get_best()[1]:.2f} s',
-                self._width//2 - 230, self._height//2 - 130,
-                arcade.color.BLACK, font_size=30)
-
-        arcade.draw_text('Press Enter To Go Back To Menu',
-                self._width//2 - 260, self._height//2 - 210,
-                arcade.color.BLACK, font_size=30)
+        arcade.draw_text(f'Result', self._width//2 - 50, self._height//2 + 195, arcade.color.BLACK, font_size=35)
+        arcade.draw_text(f'Total Words: {self._missile_count}', self._width//2 - 230, self._height//2 + 110, arcade.color.BLACK, font_size=30)
+        arcade.draw_text(f'Total Time: {self._time:.2f}', self._width//2 - 230, self._height//2 + 30, arcade.color.BLACK, font_size=30)
+        arcade.draw_text(f'Speed: {(self._missile_count/(self._time/60)):.2f} WPM', self._width//2 - 230, self._height//2 - 50, arcade.color.BLACK, font_size=30)
+        arcade.draw_text(f'Local Best Time: {self._score_rw.get_best()[1]:.2f} s', self._width//2 - 230, self._height//2 - 130, arcade.color.BLACK, font_size=30)
+        arcade.draw_text('Press Enter To Go Back To Menu', self._width//2 - 260, self._height//2 - 210, arcade.color.BLACK, font_size=30)
 
     def _draw_stat(self):
         ''' draw the stat of the game '''
 
-        arcade.draw_text('RocketTyper',
-                100, 25,
-                arcade.color.BLACK, font_size=25)
+        arcade.draw_text('RocketTyper', 100, 25, arcade.color.BLACK, font_size=25)
         self._draw_rocket_health()
         self._draw_missile_count()
         self._draw_time()
@@ -166,23 +149,17 @@ class World():
     def _draw_rocket_health(self):
         ''' draw the text showing the rocket health on the game screen '''
 
-        arcade.draw_text('HEALTH',
-                self._width//2 - 50, 25,
-                arcade.color.BLACK, font_size=25)
+        arcade.draw_text('HEALTH', self._width//2 - 50, 25, arcade.color.BLACK, font_size=25)
 
     def _draw_missile_count(self):
         ''' draw the text showing the amount of missiles destroyed on the screen '''
 
-        arcade.draw_text(str(f'Word: {self._missile_count}'),
-                self._width//2 + 175, 25,
-                arcade.color.BLACK, font_size=22)
+        arcade.draw_text(str(f'Word: {self._missile_count}'), self._width//2 + 175, 25, arcade.color.BLACK, font_size=22)
 
     def _draw_time(self):
         ''' draw the text showing the time since the game started on the screen '''
 
-        arcade.draw_text(str(f'Time: {self._time:.2f} s'),
-                self._width//2 + 300, 25,
-                arcade.color.BLACK, font_size=22)
+        arcade.draw_text(str(f'Time: {self._time:.2f} s'), self._width//2 + 300, 25, arcade.color.BLACK, font_size=22)
 
     def update(self, delta):
         ''' call the update method of components of the game based on the state attribute '''
