@@ -2,6 +2,7 @@ import arcade
 from .Cloud import Cloud
 from .ComponentList import ComponentList
 from .MissileManager import MissileManager
+from .MatchStat import MatchStat
 import time
 
 class World():
@@ -50,10 +51,10 @@ class World():
         self._missile_manager = MissileManager(self._width, self._height, target=self._rocket.right)
         self._missile_manager.add_word_manager(word_path)
 
-    def add_scoreManager(self,obj):
+    def add_scoreManager(self, scoreManager):
         ''' assigning the instance of ScoreFileRW class from parameter obj to score_rw attribute '''
 
-        self._score_rw = obj
+        self._scoreManager = scoreManager
 
     def add_component(self, component):
         ''' call the add_component method of the components attribute which is binded to component_list instance and pass in the component parameter '''
@@ -123,8 +124,8 @@ class World():
         arcade.draw_texture_rectangle(self._width//2 , self._height//2 ,self._width-250, self._height-150,result)
         self._draw_gameover_stat()
         if self._score_witten == False:
-            self._score_rw.write([self._missile_count, self._time, self._missile_count/(self._time/60)])
-            self._score_rw.read()
+            self._scoreManager.write(MatchStat(wordAmount=self._missile_count, wordPerMinute=self._missile_count/(self._time/60), totalTime=self._time))
+            self._scoreManager.read()
             self._score_witten = True
         self._restart = True
 
@@ -135,7 +136,7 @@ class World():
         arcade.draw_text(f'Total Words: {self._missile_count}', self._width//2 - 230, self._height//2 + 110, arcade.color.BLACK, font_size=30)
         arcade.draw_text(f'Total Time: {self._time:.2f}', self._width//2 - 230, self._height//2 + 30, arcade.color.BLACK, font_size=30)
         arcade.draw_text(f'Speed: {(self._missile_count/(self._time/60)):.2f} WPM', self._width//2 - 230, self._height//2 - 50, arcade.color.BLACK, font_size=30)
-        arcade.draw_text(f'Local Best Time: {self._score_rw.get_best()[1]:.2f} s', self._width//2 - 230, self._height//2 - 130, arcade.color.BLACK, font_size=30)
+        arcade.draw_text(f'Local Best Time: {self._scoreManager.get_best().totalTime:.2f} s', self._width//2 - 230, self._height//2 - 130, arcade.color.BLACK, font_size=30)
         arcade.draw_text('Press Enter To Go Back To Menu', self._width//2 - 260, self._height//2 - 210, arcade.color.BLACK, font_size=30)
 
     def _draw_stat(self):

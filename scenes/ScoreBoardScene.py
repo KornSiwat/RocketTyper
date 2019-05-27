@@ -4,14 +4,24 @@ class ScoreBoardScene():
     def __init__(self, width, height, scoreManager, assetManager=0):
         self._width = width
         self._height = height
+
         self.assetManager = assetManager
+
         self._grayBackground = arcade.load_texture("images/result.png")
         self._scoreboardBackground = arcade.load_texture('images/scoreboardbg.png')
+        self._background_width = self._width-250
+        self._background_height = self._height-150
+
+
         self._scoreManager = scoreManager
+
         self._scoreboardPic = arcade.load_texture('images/scoreboard.png')
+
         self._header = arcade.Sprite()
         self._header.append_texture(arcade.load_texture('images/scoreboard.png'))
         self._header.set_texture(0)
+
+        self._header_text = []
 
     def draw(self):
         ''' draw scoreboard scene element '''
@@ -19,12 +29,11 @@ class ScoreBoardScene():
         self.draw_background()
         self.draw_header()
         self.draw_table()
-        self.draw_table_info()
         self.draw_high_score()
 
     def draw_background(self):
-        arcade.draw_texture_rectangle(self._width//2 , self._height//2 , self._width-250, self._height-150, self._grayBackground)
-        arcade.draw_texture_rectangle(self._width//2 , self._height//2 , self._width-250, self._height-150 , self._scoreboardBackground)
+        self.draw_texture(width=self._background_width, height=self._background_height, texture=self._grayBackground)
+        self.draw_texture(width=self._background_width, height=self._background_height, texture=self._scoreboardBackground)
 
     def draw_header(self):
         self._header.center_x = self._width//2
@@ -32,18 +41,28 @@ class ScoreBoardScene():
         self._header.draw()
 
     def draw_table(self):
-        arcade.draw_text('No.', self._width//2 - 280, self._height//2 + 100, arcade.color.BLACK, font_size=23)
-        arcade.draw_text('Words', self._width//2 - 200, self._height//2 + 100, arcade.color.BLACK, font_size=23)
-        arcade.draw_text('Word Per Minute', self._width//2 - 75, self._height//2 + 100, arcade.color.BLACK,font_size=23)
-        arcade.draw_text('Total Time', self._width//2 + 170, self._height//2 + 100, arcade.color.BLACK, font_size=23)
+        self.draw_table_header()
+        self.draw_table_body()
 
-    def draw_table_info(self):
-            for no, score in enumerate(self._scoreManager.get_latest_five(),1):
-                arcade.draw_text(f'{no}', self._width//2 - 270, self._height//2 + 90 - 30 * no, arcade.color.BLACK, font_size=23)
-                arcade.draw_text(f'{score[0]:02.2f}', self._width//2 - 180, self._height//2 + 90 - 30 * no, arcade.color.BLACK, font_size=23)
-                arcade.draw_text(f'{score[2]}', self._width//2 , self._height//2 + 90 - 30 * no, arcade.color.BLACK, font_size=23)
-                arcade.draw_text(f'{score[1]}', self._width//2 + 200, self._height//2 + 90 - 30 * no, arcade.color.BLACK, font_size=23)
+    def draw_table_header(self):
+        self.draw_text(x=-280, y=100, word='No.')
+        self.draw_text(x=-200, y=100, word='Words')
+        self.draw_text(x=-75, y=100, word='Word Per Minute')
+        self.draw_text(x=170, y=100, word='Total Time')
+
+    def draw_table_body(self):
+        for no, matchStat in enumerate(self._scoreManager.get_latest_five(),1):
+            self.draw_text(x=-270, y= 90-(30 * no), word=str(no))
+            self.draw_text(x=-180, y= 90-(30 * no), word=f'{matchStat.wordAmount:02.2f}')
+            self.draw_text(x=0, y= 90-(30 * no), word=f'{matchStat.wordPerMinute}')
+            self.draw_text(x=200, y= 90-(30 * no), word=f'{matchStat.totalTime}')
 
     def draw_high_score(self):
-        arcade.draw_text(f'Local Best Time: {self._scoreManager.get_best()[1]:.2f} s', self._width//2 - 320, self._height//2 - 120, arcade.color.BLACK, font_size=23)
-        arcade.draw_text(f'World Best Time: Feature Coming Soon', self._width//2 - 320, self._height//2 - 160, arcade.color.BLACK, font_size=23)
+        self.draw_text(x=-320, y=-120, word=f'Local Best Time: {self._scoreManager.get_best()[1]:.2f} s')
+        self.draw_text(x=-320, y=-160, word=f'World Best Time: Feature Coming Soon')
+
+    def draw_text(self, x, y, word=''):
+        arcade.draw_text(word, self._width//2 + x, self._height//2 + y, color=arcade.color.BLACK, font_size=23)
+
+    def draw_texture(self, width, height, texture):
+        arcade.draw_texture_rectangle(self._width//2 , self._height//2, width=width, height=height,texture=texture)

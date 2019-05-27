@@ -1,3 +1,5 @@
+from .MatchStat import MatchStat
+
 class ScoreFileManager():
     ''' class for ScoreFileRw which is responsible for reading and writing the score file '''
 
@@ -5,7 +7,7 @@ class ScoreFileManager():
         ''' create attributes of and ScoreFileRW instance '''
 
         self.file_name = name
-        self.score_list = []
+        self.matchStatList = []
 
     def read(self):
         ''' open the file from the path stored in file_name attribute and read and split them by the colon and convert the data type from
@@ -19,17 +21,14 @@ class ScoreFileManager():
             for i in range(len(line)):
                 line[i] = float(line[i])
         self.score_list = score_list
+        for line in self.score_list:
+            self.matchStatList.append(MatchStat(wordAmount=line[0], wordPerMinute=line[1], totalTime=line[2]))
 
-    def write(self, score_lst):
+    def write(self, matchStat):
         '''open the file from the path stored in file_name attribute and append the string containing the stats from score_lst parameter to the last line of the text file '''
 
         with open( self.file_name, 'a') as file:
-            file.write(f'\n{score_lst[0]},{score_lst[1]:.2f},{score_lst[2]:.2f}')
-
-    def get_score(self):
-        ''' return the list from score_list attribute '''
-
-        return self.score_list
+            file.write(f'\n{matchStat.wordAmount},{matchStat.wordPerMinute:.2f},{matchStat.totalTime:.2f}')
 
     def get_best(self):
         ''' return the list containing the stats of the match that has the longest play time '''
@@ -39,6 +38,6 @@ class ScoreFileManager():
     def get_latest_five(self):
         ''' return the list containg the stats list of lastest five match '''
 
-        result = self.score_list[::-1]
+        result = self.matchStatList[::-1]
         return result[0:5]
 
