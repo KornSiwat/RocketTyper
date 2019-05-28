@@ -40,7 +40,7 @@ class World():
         self.gameover = False
 
         self.pressing_key = 0
-        self.next_level_time = 10
+        self.next_level_time = 15
 
         self.gameRestart = gameRestart
 
@@ -150,10 +150,10 @@ class World():
                 self.check_game_status()
 
     def update_level(self):
-        self.level_up_time = 15
-        if self.playTime >= level_up_time:
+        level_up_time = 20
+        if self.playTime >= self.next_level_time:
             self.missile_manager.increase_level()
-            self.level_up_time += 20
+            self.next_level_time += level_up_time
 
     def update_play_time(self):
         self.playTime = time.time() - self.startTime
