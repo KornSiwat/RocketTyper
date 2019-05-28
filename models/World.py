@@ -55,8 +55,8 @@ class World():
         self.rocket.append_texture(arcade.load_texture('images/rocket.png',scale=scale))
 
     def setup_missile_manager(self, fileName):
-        rocket_body_position = self.rocket.right
-        self.missile_manager = MissileManager(self.width, self.height, missileTargetPosition=rocket_body_position, wordFileName=fileName, on_missile_destroy=self.on_missile_destroy, on_missile_hit=self.on_missile_hit)
+        rocket_body_position = self.rocket.right + 90
+        self.missile_manager = MissileManager(self.width, self.height, missileTarget=rocket_body_position, wordFileName=fileName, on_missile_destroy=self.on_missile_destroy, on_missile_hit=self.on_missile_hit)
 
     def setup_components(self):
         self.componentList = ComponentList()
@@ -65,7 +65,7 @@ class World():
     def setup_cloud(self):
         cloudAmount = 5
         self.cloud_list = arcade.SpriteList()
-        self.cloud_list.sprite_list = list(map(lambda x : Cloud(self.width, self.height), range(cloudAmount)))
+        self.cloud_list.sprite_list = list(map(lambda x : Cloud(self.width, self.height + 50), range(cloudAmount)))
 
     def config_rocket(self):
         self.rocket.set_texture(6)
@@ -75,7 +75,6 @@ class World():
         bottom_of_screen = 50
         self.cockpit.center_x = self.width//2
         self.cockpit.center_y = bottom_of_screen
-        # self.cockpit.set_texture(0)
         self.componentList.add_component(self.cockpit)
 
     def config_cloud(self):
@@ -103,11 +102,16 @@ class World():
 
     def draw(self):
 
-        self.cloud_list.draw()
-        self.rocket.draw()
-        self.missile_manager.draw()
-        self.componentList.draw()
-        self.draw_stat_bar()
+        if not self.gameover and not self.rocket.is_destroyed():
+            self.cloud_list.draw()
+            self.rocket.draw()
+            self.missile_manager.draw()
+            self.componentList.draw()
+            self.draw_stat_bar()
+        elif not self.rocket.is_out_of_screen():
+            self.rocket.draw()
+        elif self.rocket.is_out_of_screen():
+            self.matchStatScene.draw()
 
     def draw_stat_bar(self):
         arcade.draw_text('RocketTyper', 100, 25, arcade.color.BLACK, font_size=25)
@@ -134,14 +138,15 @@ class World():
         self.rocket.update()
         self.rocket.update_animation()
 
-        if self.ready_to_draw():
-            self.componentList.update()
-            self.cloud_list.update()
-            self.update_play_time()
-            self.update_level()
-            self.missile_manager.update(self.pressing_key)
-        else:
-            self.check_game_ready()
+        if not self.gameover:
+            if self.ready_to_draw() and not self.rocket.is_destroyed():
+                self.componentList.update()
+                self.cloud_list.update()
+                self.update_play_time()
+                self.update_level()
+                self.missile_manager.update(self.pressing_key)
+            else:
+                self.check_game_status()
 
     def update_level(self):
         level_up_time = 10
@@ -161,10 +166,13 @@ class World():
     def on_gameover(self):
         self.matchStatScene = MatchStatScene(self.width, self.height, self.destroyedMissileAmount, self.playTime)
 
-    def check_game_ready(self):
-        if self.rocket.at_ready_position():
+    def check_game_status(self):
+        if self.rocket.at_ready_position() and not self.gameReady:
             self.gameReady = True
             self.start_game_timer()
+        elif self.rocket.is_destroyed() and self.rocket.is_out_of_screen():
+            self.on_gameover()
+            self.gameover = True
 
     def is_over(self):
         return self.gameover

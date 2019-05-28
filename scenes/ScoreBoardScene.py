@@ -69,12 +69,12 @@ class ScoreBoardScene():
     def config_table_body(self):
         for no, matchStat in enumerate(self._scoreManager.get_latest_five(),1):
             self._table_data.append([-270, 90-(30 * no), str(no)])
-            self._table_data.append([-180, 90-(30 * no), f'{matchStat.wordAmount:02}'])
-            self._table_data.append([0, 90-(30 * no), f'{matchStat.wordPerMinute:02}'])
-            self._table_data.append([200, 90-(30 * no), f'{matchStat.totalTime:02}'])
+            self._table_data.append([-180, 90-(30 * no), f'{matchStat.wordAmount:02.2f}'])
+            self._table_data.append([0, 90-(30 * no), f'{matchStat.wordPerMinute:02.2f}'])
+            self._table_data.append([200, 90-(30 * no), f'{matchStat.totalTime:02.2f}'])
 
     def config_table_footer(self):
-        self._table_data.append([-320, -120, f'Local Best Time: {self._scoreManager.get_best()[1]:.2f} s'])
+        self._table_data.append([-320, -120, f'Local Best Time: {self._scoreManager.get_best_time():.2f} s'])
         self._table_data.append([-320, -160, f'World Best Time: Feature Coming Soon'])
 
     def draw_text(self, x, y, word=''):
@@ -84,8 +84,6 @@ class ScoreBoardScene():
         arcade.draw_texture_rectangle(self._width//2 , self._height//2, width=width, height=height,texture=texture)
 
     def draw(self):
-        ''' draw scoreboard scene elements '''
-
         self.draw_background()
         self.draw_header()
         self.draw_table()

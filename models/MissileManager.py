@@ -5,11 +5,11 @@ from .ReadWordFile import ReadWordFile
 from random import choice
 
 class MissileManager():
-    def __init__(self, width, height, missileTargetPosition, wordFileName, on_missile_destroy, on_missile_hit):
+    def __init__(self, width, height, missileTarget, wordFileName, on_missile_destroy, on_missile_hit):
         self.width = width
         self.height = height
 
-        self.missileTargetPosition = missileTargetPosition
+        self.missileTarget = missileTarget
 
         self.on_missile_hit = on_missile_hit
         self.on_missile_destroy = on_missile_destroy
@@ -31,7 +31,8 @@ class MissileManager():
         slot_height = 200
         missile_start_x = self.width
         for y_position in range(self.height, slot_height , -(missile_height)):
-            self.slot_list.append(Slot(x_position=missile_start_x, y_position=y_position-50, target=self.missileTargetPosition, word_manager=self.word_manager))
+            missile_start_y = y_position - 50
+            self.slot_list.append(Slot(missile_start_x, missile_start_y, self.missileTarget, self.word_manager, self.on_missile_destroy, self.on_missile_hit))
 
     def setup_manager_asset(self):
         self.current_slot = None
@@ -40,7 +41,7 @@ class MissileManager():
         self.level = 0
         self.hard_level = 5
         self.wait_time = 3
-        self.deploy_amount = 1
+        self.deploy_amount = 2
         self.deploy_timer = time.time()
 
     def draw(self):
@@ -48,15 +49,13 @@ class MissileManager():
             slot.draw()
 
     def update(self, key):
-
         self.check_deploy_time()
         self.update_missile_position()
         self.pressing_key_handle(key)
-        # self.update_level()
 
     def update_missile_position(self):
         for slot in self.get_used_slot():
-            slot.update_pos()
+            slot.update_missile_position()
 
     def pressing_key_handle(self,key):
         no_typing_missile = self.current_slot==None
@@ -64,7 +63,7 @@ class MissileManager():
             for slot in self.get_used_slot():
                 slot.update_key(key)
                 if slot.is_selected() == True:
-                    self._current_slot = slot
+                    self.current_slot = slot
                     key = 0
                     break
         elif self.current_slot.is_use() == True:
@@ -98,20 +97,11 @@ class MissileManager():
                 return True
         return False
 
-    def _update_level(self):
+    def update_level(self):
         pass
 
     def reached_hard_level(self):
-        return self.level == self.hard_level
-
-    # def _change_difficulty(self,wait_time=2, deploy_amount=2, increase_speed=False):
-    #     if not self.updated_level:
-    #         self.word_manager.set_level(self.level//2)
-    #         self.wait_time = wait_time
-    #         self.deploy_amount = deploy_amount
-    #         if increase_speed:
-    #             self.increase_missile_speed()
-    #         self.updated_level = True
+        return self.level < self.hard_level
 
     def increase_missile_speed(self):
         for slot in self.slot_list:

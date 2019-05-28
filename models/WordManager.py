@@ -3,7 +3,6 @@ from random import choice
 from .ReadWordFile import ReadWordFile
 
 class WordManager():
-
     def __init__(self, wordFileName , level=1):
 
         self.level = level

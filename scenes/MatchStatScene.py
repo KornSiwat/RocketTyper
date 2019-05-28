@@ -49,8 +49,8 @@ class MatchStatScene():
         self.statList = [
             [-50, 195, 'Result', 35],
             [-230, 110, f'Total Words: {self.matchStat.wordAmount}', 30],
-            [-230, 30, f'Total Time: {self.matchStat.totalTime}', 30],
-            [-230, -50, f'Speed: {self.matchStat.wordPerMinute} WPM', 30],
-            [-230, -130, f'Local Best Time: {self.scoreManager.get_best().totalTime:.2f} s', 30],
-            [-260, -210, f'Press Enter To Go Back To Menu', 37],
+            [-230, 30, f'Total Time: {self.matchStat.totalTime:.2f} s', 30],
+            [-230, -50, f'Speed: {self.matchStat.wordPerMinute:.2f} WPM', 30],
+            [-230, -130, f'Local Best Time: {self.scoreManager.get_best_time():.2f} s', 30],
+            [-260, -210, f'Press Enter To Go Back To Menu', 30],
         ]

@@ -16,8 +16,8 @@ class Rocket(arcade.AnimatedTimeSprite):
 
     def update(self):
         self.update_animation()
-
-        if not self.at_ready_position():
+        
+        if not self.at_ready_position() and self.active:
             self.move_up()
 
         if self.is_destroyed() and not self.is_out_of_screen():
