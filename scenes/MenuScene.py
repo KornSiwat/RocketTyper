@@ -2,27 +2,22 @@ import arcade
 import sys
 
 sys.path.append('..')
+from models.Route import Route
 from models.MenuChoiceSprite import MenuChoiceSprite
 
-choices = {
-    0: 'game',
-    1: 'instruction',
-    2: 'scoreboard'
-}
-
 class MenuScene():
-    def __init__(self,width, height, on_select):
+    def __init__(self,width, height, router):
         self._width = width
         self._height = height
 
         self._texture_frame_rate = 10
-        self.selecting_choice = 0
+        self.selecting_choice = 1
 
         self.setup_assets()
         self.setup_choice_list()
         self.config_sprites()
 
-        self.on_select = on_select
+        self.router = router
 
     def setup_assets(self):
         self.rocket_menu = MenuChoiceSprite()
@@ -86,7 +81,7 @@ class MenuScene():
 
     def update_choice_animation(self):
         for i in range(len(self.choice_list)):
-            is_selected = i == self.selecting_choice
+            is_selected = i == self.selecting_choice - 1
             if is_selected:
                 self.choice_list[i].update()
                 self.choice_list[i].update_animation()
@@ -95,14 +90,14 @@ class MenuScene():
 
     def on_key_press(self,key):
         if key == arcade.key.DOWN:
-            if self.selecting_choice < 2:
+            if self.selecting_choice < 3:
                 self.selecting_choice += 1
             else:
-                self.selecting_choice = 0
+                self.selecting_choice = 1
         elif key == arcade.key.UP:
-            if self.selecting_choice > 0 :
+            if self.selecting_choice > 1 :
                 self.selecting_choice -= 1
             else:
-                self.selecting_choice = 2
+                self.selecting_choice = 3
         elif key == arcade.key.ENTER:
-            self.on_select(choices[self.selecting_choice])
+            self.router.change_route(Route(self.selecting_choice))

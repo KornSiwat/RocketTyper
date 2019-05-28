@@ -3,23 +3,10 @@ import arcade
 import sys
 sys.path.append('..')
 from models.ScoreFileManager import ScoreFileManager
-
-routes = {
-    'menu':0,
-    'game':1,
-    'instruction':2,
-    'scoreboard':3,
-}
-
-choices = {
-    0: 'menu',
-    1: 'game',
-    2: 'instruction',
-    3: 'scoreboard'
-}
+from models.Route import Route
 
 class ScoreBoardScene():
-    def __init__(self, width, height, on_select):
+    def __init__(self, width, height, router):
         self._width = width
         self._height = height
 
@@ -30,7 +17,7 @@ class ScoreBoardScene():
         self.setup_table()
         self.config_background()
 
-        self.on_select = on_select
+        self.router = router
 
     def setup_scoreManager(self):
         self._scoreManager = ScoreFileManager('score.txt')
@@ -104,4 +91,4 @@ class ScoreBoardScene():
 
     def on_key_press(self, key):
         if key == arcade.key.ESCAPE:
-            self.on_select(choices[routes['menu']])
+            self.router.change_route(Route.menu)

@@ -6,10 +6,12 @@ from models.World import World
 from models.Rocket import Rocket
 
 class PlayingScene():
-	def __init__(self, width, height):
+	def __init__(self, width, height, router):
 		self.width = width
 		self.height = height
 		self.world = World(width=width, height=height, gameRestart=self.gameRestart)
+
+		self.router = router
 
 	def draw(self):
 		self.world.draw()

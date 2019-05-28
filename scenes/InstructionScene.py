@@ -1,21 +1,11 @@
 import arcade
+import sys
 
-routes = {
-    'menu':0,
-    'game':1,
-    'instruction':2,
-    'scoreboard':3,
-}
-
-choices = {
-    0: 'menu',
-    1: 'game',
-    2: 'instruction',
-    3: 'scoreboard'
-}
+sys.path.append('..')
+from models.Route import Route
 
 class InstructionScene():
-    def __init__(self, width, height, on_select):
+    def __init__(self, width, height, router):
         self._width = width
         self._height = height
 
@@ -23,7 +13,7 @@ class InstructionScene():
         self.setup_header()
         self.setup_background()
 
-        self.on_select = on_select
+        self.router = router
 
     def setup_assets(self):
         self._background = arcade.load_texture("images/background.png")
@@ -62,4 +52,4 @@ class InstructionScene():
 
     def on_key_press(self, key):
         if key == arcade.key.ESCAPE:
-            self.on_select(choices[routes['menu']])
+            self.router.change_route(Route.menu)
