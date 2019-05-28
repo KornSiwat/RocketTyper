@@ -98,7 +98,7 @@ class MissileManager():
         return False
 
     def update_level(self):
-        pass
+        self.increase_missile_speed()
 
     def reached_hard_level(self):
         return self.level < self.hard_level
