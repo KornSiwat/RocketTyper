@@ -6,10 +6,8 @@ from models.World import World
 from models.Rocket import Rocket
 
 class PlayingScene():
-	def __init__(self, width, height, router):
-		self.width = width
-		self.height = height
-		self.world = World(width=width, height=height, gameRestart=self.gameRestart)
+	def __init__(self, router):
+		self.world = World(gameRestart=self.gameRestart)
 
 		self.router = router
 
@@ -24,4 +22,4 @@ class PlayingScene():
 		self.world.on_key_press(key)
 
 	def gameRestart(self):
-		self.world = World(width=self.width, height=self.height, gameRestart=self.gameRestart)
+		self.world = World(gameRestart=self.gameRestart)

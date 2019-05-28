@@ -4,13 +4,14 @@ import sys
 sys.path.append('..')
 from models.Route import Route
 from models.MenuChoiceSprite import MenuChoiceSprite
+from Config import Config
 
 class MenuScene():
-    def __init__(self,width, height, router):
-        self._width = width
-        self._height = height
+    def __init__(self, router):
+        self.width = Config.SCREEN_WIDTH
+        self.height = Config.SCREEN_HEIGHT
 
-        self._texture_frame_rate = 10
+        self.texture_frame_rate = 10
         self.selecting_choice = 1
 
         self.setup_assets()
@@ -47,16 +48,16 @@ class MenuScene():
         self.scoreboardChoice.set_texture(1)
 
     def config_sprite_frame_rate(self):
-        self.rocket_menu.texture_change_frames = self._texture_frame_rate
-        self.startChoice.texture_change_frames = self._texture_frame_rate
-        self.howToPlayChoice.texture_change_frames = self._texture_frame_rate
-        self.scoreboardChoice.texture_change_frames = self._texture_frame_rate
+        self.rocket_menu.texture_change_frames = self.texture_frame_rate
+        self.startChoice.texture_change_frames = self.texture_frame_rate
+        self.howToPlayChoice.texture_change_frames = self.texture_frame_rate
+        self.scoreboardChoice.texture_change_frames = self.texture_frame_rate
 
     def config_sprite_position(self):
-        self.rocket_menu.center_x, self.rocket_menu.center_y = self._width//2, self._height//2 + 120
-        self.startChoice.center_x, self.startChoice.center_y = self._width//2, self._height//2 - 90
-        self.howToPlayChoice.center_x, self.howToPlayChoice.center_y = self._width//2, self._height//2 - 160
-        self.scoreboardChoice.center_x, self.scoreboardChoice.center_y = self._width//2, self._height//2 - 230
+        self.rocket_menu.center_x, self.rocket_menu.center_y = self.width//2, self.height//2 + 120
+        self.startChoice.center_x, self.startChoice.center_y = self.width//2, self.height//2 - 90
+        self.howToPlayChoice.center_x, self.howToPlayChoice.center_y = self.width//2, self.height//2 - 160
+        self.scoreboardChoice.center_x, self.scoreboardChoice.center_y = self.width//2, self.height//2 - 230
 
     def config_choice_selection(self):
         self.rocket_menu.select()

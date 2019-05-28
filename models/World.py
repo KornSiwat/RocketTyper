@@ -10,16 +10,17 @@ import time
 import sys
 sys.path.append('..')
 from scenes.MatchStatScene import MatchStatScene
+from Config import Config
 
 class World():
 
     STATE_FROZEN = 1
     STATE_STARTED = 2
 
-    def __init__(self, width, height, gameRestart):
+    def __init__(self, gameRestart):
 
-        self.width = width
-        self.height = height
+        self.width = Config.SCREEN_WIDTH
+        self.height = Config.SCREEN_HEIGHT
 
         self._state = World.STATE_FROZEN
 
@@ -164,7 +165,7 @@ class World():
         self.rocket.hit_by_missile()
 
     def on_gameover(self):
-        self.matchStatScene = MatchStatScene(self.width, self.height, self.destroyedMissileAmount, self.playTime)
+        self.matchStatScene = MatchStatScene(self.destroyedMissileAmount, self.playTime)
 
     def check_game_status(self):
         if self.rocket.at_ready_position() and not self.gameReady:

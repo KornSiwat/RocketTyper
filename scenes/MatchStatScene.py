@@ -4,32 +4,33 @@ import sys
 sys.path.append('..')
 from models.ScoreFileManager import ScoreFileManager
 from models.MatchStat import MatchStat
+from Config import Config
 
 class MatchStatScene():
-    def __init__(self, width, height, destoryedMissileAmount, playTime):
-        self.width = width
-        self.height = height
+    def __init__(self, destoryedMissileAmount, playTime):
+        self.width = Config.SCREEN_WIDTH
+        self.height = Config.SCREEN_HEIGHT
 
         self.setup_background()
 
-        self.setup_scoreManager()
-        self.setup_matchStat(destoryedMissileAmount, playTime)
-        self.config_scoreManager()
+        self.setup_score_manager()
+        self.setup_match_stat(destoryedMissileAmount, playTime)
+        self.config_score_manager()
         self.config_stat()
 
-    def setup_scoreManager(self):
-        self.scoreManager = ScoreFileManager('score.txt')
+    def setup_score_manager(self):
+        self.score_manager = ScoreFileManager('score.txt')
 
-    def setup_matchStat(self, destoryedMissileAmount, playTime):
+    def setup_match_stat(self, destoryedMissileAmount, playTime):
         wordPerMinute = destoryedMissileAmount/(playTime/60)
-        self.matchStat = MatchStat(destoryedMissileAmount, wordPerMinute, playTime)
+        self.match_stat = MatchStat(destoryedMissileAmount, wordPerMinute, playTime)
 
     def setup_background(self):
         self.background = arcade.load_texture('images/result.png')
 
-    def config_scoreManager(self):
-        self.scoreManager.write(self.matchStat)
-        self.scoreManager.read()
+    def config_score_manager(self):
+        self.score_manager.write(self.match_stat)
+        self.score_manager.read()
 
     def draw(self):
         self.draw_background()
@@ -48,9 +49,9 @@ class MatchStatScene():
     def config_stat(self):
         self.statList = [
             [-50, 195, 'Result', 35],
-            [-230, 110, f'Total Words: {self.matchStat.wordAmount}', 30],
-            [-230, 30, f'Total Time: {self.matchStat.totalTime:.2f} s', 30],
-            [-230, -50, f'Speed: {self.matchStat.wordPerMinute:.2f} WPM', 30],
-            [-230, -130, f'Local Best Time: {self.scoreManager.get_best_time():.2f} s', 30],
+            [-230, 110, f'Total Words: {self.match_stat.wordAmount}', 30],
+            [-230, 30, f'Total Time: {self.match_stat.totalTime:.2f} s', 30],
+            [-230, -50, f'Speed: {self.match_stat.wordPerMinute:.2f} WPM', 30],
+            [-230, -130, f'Local Best Time: {self.score_manager.get_best_time():.2f} s', 30],
             [-260, -210, f'Press Enter To Go Back To Menu', 30],
         ]
