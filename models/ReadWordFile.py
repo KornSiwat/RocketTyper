@@ -13,7 +13,7 @@ class ReadWordFile():
             else:
                 self._categorized_word[word[0].lower()].append(word)
 
-    def get_list(self):
+    def get_categorized_list(self):
         ''' return dictionary object from categorized_word attribute '''
 
         return self._categorized_word

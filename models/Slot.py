@@ -2,16 +2,16 @@ from .Missile import Missile
 
 class Slot():
 
-    def __init__(self, x, y, target, word_manager):
+    def __init__(self, x_position, y_position, target, word_manager):
 
         self.word_manager = word_manager
         self.being_used = False
         self.selected = False
-        self.x_position = x
-        self.y_position = y
+        self.x_position = x_position
+        self.y_position = y_position
         self.missile = None
         self.target = target
-        self._missile_speed = 1
+        self.missile_speed = 1
         self.level = 1
 
     def create_missile(self, word):
@@ -20,7 +20,7 @@ class Slot():
 
     def draw(self):
         if self.missile != None:
-            self.issile.draw_with_word()
+            self.missile.draw_with_word()
 
     def update_pos(self):
 
@@ -34,7 +34,7 @@ class Slot():
         return self.being_used
 
     def is_selected(self):
-        return self._selected
+        return self.selected
 
     def check_missile_status(self):
         if self.missile.is_selected() == True:
