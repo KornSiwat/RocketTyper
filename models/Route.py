@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class Route(Enum):
     menu = 0
     game = 1

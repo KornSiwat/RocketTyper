@@ -1,7 +1,5 @@
 class ReadWordFile():
-
     def __init__(self, file_name=''):
-
         with open(file_name, 'r') as Fin:
             self.raw_word = [x.strip() for x in Fin.readlines()]
         self.categorized_word = {}

@@ -1,6 +1,7 @@
 import arcade
 from .Word import Word
 
+
 class Missile(arcade.Sprite):
     def __init__(self, x, y, word, target, speed, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -11,7 +12,7 @@ class Missile(arcade.Sprite):
         self.missile_target = target
         self.distance_from_missile = 60
         self.first_alphabet = word[0]
-        self.word = Word(self.right , self.center_y - 5, word)
+        self.word = Word(self.right, self.center_y - 5, word)
         self.selected = False
         self.active = True
         self.hit = True

@@ -1,7 +1,8 @@
+from models.Route import Route
 import sys
 
 sys.path.append('..')
-from models.Route import Route
+
 
 class Router():
     def __init__(self):

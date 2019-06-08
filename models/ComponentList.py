@@ -9,7 +9,6 @@ class ComponentList():
                 component.draw()
 
     def add_component(self, component):
-
         self._components.append(component)
 
     def update(self):

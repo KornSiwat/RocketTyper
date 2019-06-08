@@ -1,6 +1,4 @@
 class FpsCounter:
-    ''' class for the fps counting '''
-
     def __init__(self):
         import time
         import collections
@@ -9,18 +7,13 @@ class FpsCounter:
         self.t = self.time()
 
     def tick(self):
-        ''' count the frame when draw '''
-
         t = self.time()
-        dt = t-self.t 
+        dt = t-self.t
         self.frametime.append(dt)
-        self.t = t   
+        self.t = t
 
     def fps(self):
-        ''' return the current fps '''
-
         try:
             return 60/sum(self.frametime)
         except ZeroDivisionError:
             return 0
-

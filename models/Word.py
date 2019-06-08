@@ -1,9 +1,9 @@
 import arcade
 from .Char import Char
 
-class Word():
-    def __init__(self,x ,y, word):
 
+class Word():
+    def __init__(self, x, y, word):
         self._x = x
         self._y = y
         self._word = word
@@ -13,24 +13,24 @@ class Word():
         self._selected = False
 
     def draw(self):
-
         white_text = self._word
         red_text = ''
         for char in self._char_list:
-            if char.is_active()== True:
+            if char.is_active() == True:
                 red_text += ' '
             else:
                 red_text += char.get_char()
-        arcade.draw_text(white_text, self._x, self._y, color=arcade.color.WHITE, font_size=16)
-        arcade.draw_text(red_text, self._x, self._y, color=arcade.color.RED, font_size=16)
+        arcade.draw_text(white_text, self._x, self._y,
+                        color=arcade.color.WHITE, font_size=16)
+        arcade.draw_text(red_text, self._x, self._y,
+                        color=arcade.color.RED, font_size=16)
 
     def update_pos(self, new_x):
         self._x = new_x
 
     def update_key(self, key):
-
         for char in self._char_list:
-            if char.is_active() == True:
+            if char.is_active():
                 self._current_char = char
                 break
         else:

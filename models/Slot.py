@@ -1,9 +1,8 @@
 from .Missile import Missile
 
+
 class Slot():
-
     def __init__(self, x_position, y_position, target, word_manager, on_missile_destroy, on_missile_hit):
-
         self.x_position = x_position
         self.y_position = y_position
 
@@ -16,7 +15,6 @@ class Slot():
     def config_slot(self, target):
         self.missile_target = target
         self.missile_speed = 1
-        self.level = 1
 
         self.missile = None
 
@@ -24,7 +22,8 @@ class Slot():
         self.selected = False
 
     def create_missile(self, word):
-        self.missile = Missile(self.x_position, self.y_position , word, self.missile_target, self.missile_speed)
+        self.missile = Missile(
+            self.x_position, self.y_position, word, self.missile_target, self.missile_speed)
         self.in_use = True
 
     def draw(self):
@@ -55,7 +54,7 @@ class Slot():
             self.on_missile_hit()
         else:
             self.on_missile_destroy()
-            
+
         self.word_manager.recycle_alphabet(self.missile.get_first_alphabet())
         self.set_initial_config()
 
@@ -67,6 +66,3 @@ class Slot():
     def increase_missile_speed(self):
         increasing_amount = 0.5
         self.missile_speed += increasing_amount
-
-    def set_level(self, level):
-        self.level = level

@@ -1,5 +1,6 @@
 import arcade
 
+
 class Rocket(arcade.AnimatedTimeSprite):
     def __init__(self, width, height, x, y, speed=7, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -16,7 +17,7 @@ class Rocket(arcade.AnimatedTimeSprite):
 
     def update(self):
         self.update_animation()
-        
+
         if not self.at_ready_position() and self.active:
             self.move_up()
 

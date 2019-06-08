@@ -4,6 +4,7 @@ from .WordManager import WordManager
 from .ReadWordFile import ReadWordFile
 from random import choice
 
+
 class MissileManager():
     def __init__(self, width, height, missileTarget, wordFileName, on_missile_destroy, on_missile_hit):
         self.width = width
@@ -20,19 +21,18 @@ class MissileManager():
 
         self.config_deployment()
 
-        self.updated_level = False
-
     def setup_word_manager(self, wordFileName):
         self.word_manager = WordManager(wordFileName)
 
     def setup_slot(self):
         self.slot_list = []
-        missile_height=100
+        missile_height = 100
         slot_height = 200
         missile_start_x = self.width
-        for y_position in range(self.height, slot_height , -(missile_height)):
+        for y_position in range(self.height, slot_height, -(missile_height)):
             missile_start_y = y_position - 50
-            self.slot_list.append(Slot(missile_start_x, missile_start_y, self.missileTarget, self.word_manager, self.on_missile_destroy, self.on_missile_hit))
+            self.slot_list.append(Slot(missile_start_x, missile_start_y, self.missileTarget,
+                                       self.word_manager, self.on_missile_destroy, self.on_missile_hit))
 
     def setup_manager_asset(self):
         self.current_slot = None
@@ -57,8 +57,8 @@ class MissileManager():
         for slot in self.get_used_slot():
             slot.update_missile_position()
 
-    def pressing_key_handle(self,key):
-        no_typing_missile = self.current_slot==None
+    def pressing_key_handle(self, key):
+        no_typing_missile = self.current_slot == None
         if no_typing_missile or not self.current_slot.is_selected():
             for slot in self.get_used_slot():
                 slot.update_key(key)
@@ -68,10 +68,11 @@ class MissileManager():
                     break
         elif self.current_slot.is_use() == True:
             self.current_slot.update_key(key)
+            key = 0
 
     def check_deploy_time(self):
         passed_time = time.time() - self.deploy_timer
-        if  passed_time >= self.wait_time:
+        if passed_time >= self.wait_time:
             self.deploy()
             self.deploy_timer = time.time()
 
@@ -97,20 +98,6 @@ class MissileManager():
                 return True
         return False
 
-    def update_level(self):
-        self.increase_missile_speed()
-
-    def reached_hard_level(self):
-        return self.level < self.hard_level
-
     def increase_missile_speed(self):
         for slot in self.slot_list:
-            if slot.get_level() != self.level:
                 slot.increase_missile_speed()
-                slot.set_level(self.level)
-
-    def increase_level(self):
-        max_level = 15
-        if self.level < max_level:
-            self.level += 1
-            self.updated_level = False
