@@ -161,6 +161,7 @@ class World():
                 self.update_play_time()
                 self.update_level()
                 self.missile_manager.update(self.pressing_key)
+                self.pressing_key = 0
             else:
                 self.check_game_status()
 

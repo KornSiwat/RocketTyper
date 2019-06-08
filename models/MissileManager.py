@@ -58,17 +58,18 @@ class MissileManager():
             slot.update_missile_position()
 
     def pressing_key_handle(self, key):
+        checking_key = key
         no_typing_missile = self.current_slot == None
         if no_typing_missile or not self.current_slot.is_selected():
             for slot in self.get_used_slot():
-                slot.update_key(key)
+                slot.update_key(checking_key)
                 if slot.is_selected() == True:
                     self.current_slot = slot
-                    key = 0
+                    checking_key = 0
                     break
         elif self.current_slot.is_use() == True:
-            self.current_slot.update_key(key)
-            key = 0
+            self.current_slot.update_key(checking_key)
+            checking_key = 0
 
     def check_deploy_time(self):
         passed_time = time.time() - self.deploy_timer
